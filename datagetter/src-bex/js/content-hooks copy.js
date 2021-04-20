@@ -1,7 +1,45 @@
 // Hooks added here have a bridge allowing communication between the BEX Content Script and the Quasar Application.
 
-const iFrame = document.createElement("iframe");
-iFrame.id = "datagetter-iframe";
+const iFrame = document.createElement("iframe"),
+  defaultFrameHeight = "0px",
+  defaultFrameWidth = "0px";
+
+const setIFrameDimensions = (height, width) => {
+  iFrame.height = height;
+  iFrame.width = width;
+  document.body.style.paddingLeft = width;
+};
+
+const resetIFrame = () => {
+  setIFrameDimensions(defaultFrameHeight, defaultFrameWidth);
+};
+
+let Bridge = null;
+export default function attachContentHooks(bridge) {
+  bridge.on("toggle.drawer", event => {
+    const payload = event.data;
+    if (payload.openDrawer) {
+      setIFrameDimensions("100%", "100%");
+      // setIFrameDimensions("100%", "300px");
+    } else {
+      resetIFrame();
+    }
+    bridge.send(event.eventResponseKey);
+  });
+
+  Bridge = bridge;
+}
+
+// function addElWithClass(tag, className, container) {
+//   const item = document.createElement(tag);
+//   item.className = className;
+//   container.append(item);
+//   return item;
+// }
+
+iFrame.id = "app-iframe";
+iFrame.width = "100%";
+resetIFrame();
 
 // Assign some styling so it looks seamless
 Object.assign(iFrame.style, {
@@ -12,43 +50,8 @@ Object.assign(iFrame.style, {
   left: "0",
   border: "0",
   zIndex: "2147483001",
-  overflow: "visible" // visible
+  overflow: "visible"
 });
-
-const setIFrameDimensions = (height, width) => {
-  iFrame.height = height;
-  iFrame.width = width;
-  // document.body.style.paddingLeft = width; // push content >>
-};
-
-const resetIFrame = () => {
-  setIFrameDimensions(defaultFrameHeight, defaultFrameWidth);
-};
-
-setIFrameDimensions("100%", "100%");
-// resetIFrame();
-
-export default function attachContentHooks(bridge) {
-  // bridge.on("toggle.drawer", event => {
-  //   const payload = event.data;
-  //   if (payload.openDrawer) {
-  //     console.log("open drawer.");
-  //     setIFrameDimensions("100%", "100%");
-  //     // setIFrameDimensions("100%", "300px");
-  //   } else {
-  //     console.log("no drawer");
-  //     resetIFrame();
-  //   }
-  //   bridge.send(event.eventResponseKey);
-  // });
-}
-
-// function addElWithClass(tag, className, container) {
-//   const item = document.createElement(tag);
-//   item.className = className;
-//   container.append(item);
-//   return item;
-// }
 
 (function() {
   // IIFE. When the page loads, insert our browser extension code.
