@@ -22,7 +22,7 @@ export default {
 };
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .q-layout
   background-color: $background !important
   height: 300px
@@ -32,10 +32,5 @@ export default {
   background-color: $background !important
 .q-header
   background-color: $background2
-  color: $cream
-.q-tooltip
-  background-color: $grey
-  color: $cream
-.q-btn
   color: $cream
 </style>

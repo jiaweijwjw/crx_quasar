@@ -15,13 +15,10 @@ export default {
 };
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .q-layout
-  background-color: $background !important
+  background-color: transparent !important
   overflow: auto
-.q-tooltip
-  background-color: $grey
-  color: $cream
-.q-btn
-  color: $cream
+.q-page-container
+  background-color: transparent !important
 </style>

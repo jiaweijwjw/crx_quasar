@@ -1,20 +1,20 @@
 <template>
-  <q-page class="flex flex-center q-page">
-    <q-toggle
-      v-model="showDrawerToggle"
-      label="Show side drawer?"
-      left-label
-      checked-icon="check"
-      unchecked-icon="clear"
-      dark
-      size="md"
-      keep-color="true"
-      color="primary"
-      @input="toggleDrawer"
+  <q-page class="flex flex-center">
+    <q-btn-toggle
+      v-model="appStatusToggle"
+      push
+      color="background"
+      text-color="textColor2"
+      toggle-color="background2"
+      toggle-text-color="cream"
+      :options="options"
+      @input="changeAppState"
     />
-    <q-btn label="testSetStorage" @click="testSetStorage('say', 'fuckkk')" />
-    <q-btn label="testGetStorage" @click="testGetStorage('say')" />
-    <q-btn label="testGetAll" @click="testGetAllStorage" />
+    <div v-if="appStatusToggle === true" class="page-item-container">
+      <q-btn label="testSetStorage" @click="testSetStorage('say', 'fuckkk')" />
+      <q-btn label="testGetStorage" @click="testGetStorage('say')" />
+      <q-btn label="testGetAll" @click="testGetAllStorage" />
+    </div>
   </q-page>
 </template>
 
@@ -27,20 +27,16 @@ export default {
   // }
   data() {
     return {
-      showDrawerToggle: false
+      appStatusToggle: null,
+      options: [
+        { label: "on", value: true },
+        { label: "off", value: false }
+      ]
     };
   },
   methods: {
-    toggleDrawer() {
-      Storage.save("showDrawerToggle", this.showDrawerToggle).then(res => {
-        console.log("Data saved and returned: " + res);
-        this.$q.bex
-          .send("toggle.drawer", { openDrawer: this.showDrawerToggle })
-          .then(res => {
-            console.log("Should be an event response key???");
-            console.log(res);
-          });
-      });
+    changeAppState() {
+      Storage.save("appStatusToggle", this.appStatusToggle);
     },
     testSetStorage(someKey, someString) {
       Storage.save(someKey, someString);
@@ -53,37 +49,23 @@ export default {
         console.log(res);
       });
     },
-    toggleShowDrawerToggle() {
-      Storage.save("showDrawerToggle", this.showDrawerToggle);
-    },
-    initialLoad() {
-      // CAN TRY TO GET ALL??
-      Storage.get("showDrawerToggle").then(res => {
-        console.log("initialload: " + res);
+    async initialLoad() {
+      Storage.get("appStatusToggle").then(res => {
+        console.log("initialload, app is: " + res);
+        if (!res) {
+          // first time accessing the extension, appStatusToggle in storage will be undefined.
+          this.appStatusToggle = false;
+          Storage.save("appStatusToggle", false);
+        } else {
+          this.appStatusToggle = res;
+        }
       });
     }
   },
-  computed: {
-    // toggles: {
-    //   get: function() {
-    //     return this.getToggleSettings;
-    //   },
-    //   set: function(settingsArr) {
-    //     this.setAnnotationSettings(settingsArr);
-    //   }
-    // }
+  async created() {
+    await this.initialLoad();
   },
-  created() {
-    // attach the listeners
-    this.$q.bex.on("toggle.drawer", this.toggleDrawer);
-    // this.$q.bex.on('add.chunk', this.addChunk)
-
-    this.initialLoad();
-  },
-  beforeDestroy() {
-    this.$q.bex.off("toggle.drawer", this.toggleDrawer);
-    // this.$q.bex.off('add.chunk', this.addChunk)
-  }
+  beforeDestroy() {}
 };
 </script>
 <style lang="sass" scoped>
@@ -92,10 +74,12 @@ export default {
   flex-flow: column
   align-content: center
   align-items: center
-  background-color: $background !important
+.page-item-container
+  display: flex
+  flex-flow: column
+  align-content: center
+  align-items: center
 .page-item
   display: block
   width: 100%
-.q-toggle
-  color: $cream
 </style>

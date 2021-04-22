@@ -1,1 +1,17 @@
 /* Global CSS used within your BEX. This is not preprocessed so this has to be pure CSS. */
+
+/* CSS selector by id and name */
+#datagetter-iframe[name="shown"] {
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+}
+
+#datagetter-iframe[name="hidden"] {
+  right: 47% !important;
+  bottom: 0 !important;
+  left: 47% !important;
+}
+
+/* display: block;
+  margin: auto; */

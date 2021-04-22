@@ -3,7 +3,11 @@
     class="flex flex-center"
     :class="drawerStatusToggle ? 'q-page-shown' : 'q-page-hidden'"
   >
-    <q-page-sticky :position="drawerStatusToggle ? 'top' : 'bottom'">
+    <q-page-sticky
+      :position="drawerStatusToggle ? 'top' : 'bottom'"
+      :expand="!drawerStatusToggle"
+      :class="drawerStatusToggle ? '' : 'full-page-btn'"
+    >
       <q-btn
         dense
         ripple
@@ -16,7 +20,7 @@
     </q-page-sticky>
     <div v-if="drawerStatusToggle">
       <q-btn
-        color="cream"
+        color="pink"
         outline
         icon="account_box"
         label="Login"
@@ -52,6 +56,7 @@ export default {
       this.$q.bex.send("toggle.drawer", {
         showDrawer: this.drawerStatusToggle
       });
+      // Handle the changes in UI here
     },
     async initialLoad() {
       Storage.get("drawerStatusToggle").then(res => {
@@ -76,7 +81,7 @@ export default {
 .q-page-shown
   border-width: 1px 0 0 0
   border-style: solid
-  border-color: $cream
+  border-color: $pink
 .q-page-hidden
   background-color: transparent !important
 .page-item
@@ -85,9 +90,14 @@ export default {
 .q-tooltip
   background-color: $grey
   color: $cream
+.full-page-btn
+  height: 100%
+  width: 100%
 .sticky-btn-shown
   color: $cream
 .sticky-btn-hidden
   background-color: $background
   color: $cream
+.test
+  background-color: $text-color
 </style>

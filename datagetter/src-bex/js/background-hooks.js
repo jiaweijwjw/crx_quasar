@@ -1,36 +1,26 @@
 // Hooks added here have a bridge allowing communication between the BEX Background Script and the BEX Content Script.
 // Note: Events sent from this background script using `bridge.send` can be `listen`'d for by all client BEX bridges for this BEX
-
-function onClickAddChunk(info) {
-  const text = info.selectionText;
-  console.log("Text selected: " + text);
-  console.log("Number of characters selected: " + text.length);
-  if (text.length !== 0) {
-    console.log("There was some text selected.");
-  } else {
-    console.log("No text was selected.");
-  }
-}
+const util = require("util");
 
 export default function attachBackgroundHooks(bridge, allActiveConnections) {
   bridge.on("storage.get", event => {
     const payload = event.data;
     if (payload.key === null) {
       //getAll()
-      chrome.storage.sync.get(null, r => {
+      chrome.storage.sync.get(null, items => {
         const results = [];
 
         // Group the items up into an array to take advantage of the bridge's chunk splitting.
-        for (const itemKey in r) {
-          results.push(r[itemKey]);
+        for (const itemKey in items) {
+          results.push(items[itemKey]); // value = obj[key]
         }
         console.log("Getting all data background side: " + results);
         bridge.send(event.eventResponseKey, results);
       });
     } else {
-      chrome.storage.sync.get([payload.key], r => {
-        console.log("Getting data background side: " + r[payload.key]);
-        bridge.send(event.eventResponseKey, r[payload.key]);
+      chrome.storage.sync.get([payload.key], items => {
+        console.log("Getting data background side: " + items[payload.key]);
+        bridge.send(event.eventResponseKey, items[payload.key]);
       });
     }
   });
@@ -51,15 +41,56 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
     });
   });
 
-  // chrome.browserAction.onClicked.addListener(() => {
-  //   bridge.send("toggle.drawer");
-  // });
-
-  chrome.contextMenus.create({
-    title: "Add Chunk",
-    contexts: ["selection"],
-    onclick: onClickAddChunk
+  bridge.on("initial.get", event => {
+    const payload = event.data;
+    if (payload.msg === "getInitialStatuses") {
+      chrome.storage.sync.get(
+        ["appStatusToggle", "drawerStatusToggle"],
+        results => {
+          console.log("results: " + results);
+          console.log(util.inspect(results, false, null, true));
+          console.log(
+            "Value of appStatusToggle is " + results["appStatusToggle"]
+          );
+          console.log(
+            "Value of drawerStatusToggle is " + results["drawerStatusToggle"]
+          );
+          bridge.send(event.eventResponseKey, results);
+        }
+      );
+    }
   });
+
+  // Every tab will trigger this
+  chrome.storage.onChanged.addListener(function(changes, namespace) {
+    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+      console.log(
+        `Storage key "${key}" in namespace "${namespace}" changed.`,
+        `Old value was "${oldValue}", new value is "${newValue}".`
+      );
+      if (key === "appStatusToggle" && namespace === "sync") {
+        console.log("newvalue: " + newValue);
+        if (newValue === true) {
+          bridge.send("app.status", { onApp: true });
+        }
+        if (newValue === false) {
+          bridge.send("app.status", { onApp: false });
+        }
+      }
+    }
+  });
+
+  // chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+  //   chrome.storage.sync.get(["appStatusToggle"], r => {
+  //     console.log("Getting initial appStatusToggle background side: " + r["appStatusToggle"]);
+  //     bridge.send(event.eventResponseKey, r[payload.key]);
+  //   });
+  //   chrome.tabs.sendMessage(tabs[0].id, { greeting: "hello" }, function(
+  //     response
+  //   ) {
+  //     console.log(response.farewell);
+  //   });
+  // });
 
   /*
   // EXAMPLES
