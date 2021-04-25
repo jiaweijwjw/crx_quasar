@@ -1,1 +1,3 @@
-export function getToggleSettings(/* state */) {}
+export function getChunks(state) {
+  return state.chunks;
+}

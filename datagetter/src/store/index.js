@@ -1,13 +1,13 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from "vue";
+import Vuex from "vuex";
 
-import main from './main'
+import main from "./main";
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
-let store = null
+let store = null;
 
-export default function (/* { ssrContext } */) {
+export default function(/* { ssrContext } */) {
   store = new Vuex.Store({
     modules: {
       main
@@ -16,9 +16,9 @@ export default function (/* { ssrContext } */) {
     // enable strict mode (adds overhead!)
     // for dev mode only
     strict: process.env.DEBUGGING
-  })
+  });
 
-  return store
+  return store;
 }
 
-export { store } // to be able to import and use in any js files
+export { store }; // to be able to import and use in any js files

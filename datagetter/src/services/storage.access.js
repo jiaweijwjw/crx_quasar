@@ -6,6 +6,7 @@ export default {
    */
   getAll() {
     return this.get(null).then(allItems => {
+      console.log(allItems);
       //   return allItems.filter(f => f && f.type && f.type === type);
       return allItems;
     });

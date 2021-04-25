@@ -23,6 +23,7 @@
 <script>
 import CollectedDataTable from "components/CollectedDataTable.vue";
 import Storage from "../services/storage.access";
+
 export default {
   name: "BrowserDrawerPage",
   components: {

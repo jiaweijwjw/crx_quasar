@@ -15,17 +15,14 @@
         }
       };
       chrome.runtime.sendMessage(parcel, res => {
-        chrome.storage.sync.set(
-          {
-            [res.id]: {
-              text,
-              url
-            }
-          },
-          () => {
+        chrome.storage.sync.get(["chunks"], function(results) {
+          let chunkObj = results["chunks"] ? results["chunks"] : {}; // value = obj[key]
+          let newChunk = { [res.id]: { text, url } }; // es6 computed property names
+          Object.assign(chunkObj, newChunk);
+          chrome.storage.sync.set({ ["chunks"]: chunkObj }, function() {
             console.log("id from quasar: " + res.id);
-          }
-        );
+          });
+        });
       });
     } else {
       console.log("No text was selected.");

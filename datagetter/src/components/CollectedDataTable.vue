@@ -21,10 +21,11 @@
 
 <script>
 import { uid } from "quasar";
+import { mapGetters } from "vuex";
+const util = require("util");
 export default {
   data() {
     return {
-      data: [],
       selected: [],
       pagination: {
         rowsPerPage: 5
@@ -50,6 +51,12 @@ export default {
         }
       ]
     };
+  },
+  computed: {
+    ...mapGetters("main", ["getChunks"]),
+    data() {
+      return Object.values(this.getChunks);
+    }
   },
   watch: {
     selected: function(newSelection, oldSelection) {
