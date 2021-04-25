@@ -11,6 +11,7 @@
       @input="changeAppState"
     />
     <div v-if="appStatusToggle === true" class="page-item-container">
+      <q-btn label="testdirect" @click="testdirect" />
       <q-btn label="testSetStorage" @click="testSetStorage('say', 'fuckkk')" />
       <q-btn label="testGetStorage" @click="testGetStorage('say')" />
       <q-btn label="testGetAll" @click="testGetAllStorage" />
@@ -37,6 +38,9 @@ export default {
   methods: {
     changeAppState() {
       Storage.save("appStatusToggle", this.appStatusToggle);
+    },
+    testdirect() {
+      this.$q.bex.send("testdirect", { msg: "hello" });
     },
     testSetStorage(someKey, someString) {
       Storage.save(someKey, someString);

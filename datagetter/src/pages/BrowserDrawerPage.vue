@@ -14,32 +14,20 @@
         @click="toggleDrawer"
       />
     </q-page-sticky>
-    <div v-if="drawerStatusToggle">
-      <q-btn
-        color="cream"
-        outline
-        icon="account_box"
-        label="Login"
-        class="q-mr-xs q-ml-md"
-      >
-        <q-tooltip
-          anchor="bottom middle"
-          self="center middle"
-          :offset="[15, 15]"
-          >Login</q-tooltip
-        >
-      </q-btn>
+    <div class="page-item" v-if="drawerStatusToggle">
+      <collected-data-table />
     </div>
   </q-page>
 </template>
 
 <script>
+import CollectedDataTable from "components/CollectedDataTable.vue";
 import Storage from "../services/storage.access";
 export default {
   name: "BrowserDrawerPage",
-  // components: {
-  //   SelfSelect: require("components/manualget/SelfSelect.vue").default
-  // }
+  components: {
+    CollectedDataTable
+  },
   data() {
     return {
       drawerStatusToggle: null
@@ -62,6 +50,12 @@ export default {
   },
   async created() {
     await this.initialLoad();
+    this.$q.bex.on("testdirect", event => {
+      const payload = event.data;
+      if (payload.msg === " hello") {
+        console.log("hello");
+      }
+    });
   },
   beforeDestroy() {}
 };
@@ -81,10 +75,7 @@ export default {
   background-color: transparent !important
 .page-item
   display: block
-  width: 100%
-.q-tooltip
-  background-color: $grey
-  color: $cream
+  width: 90%
 .sticky-btn-shown
   color: $cream
 .sticky-btn-hidden
