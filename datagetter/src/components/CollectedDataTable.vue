@@ -5,6 +5,7 @@
       :columns="columns"
       :row-key="row => row.id"
       dark
+      dense
       :visible-columns="visibleColumns"
       color="primary"
       rows-per-page-label="Chunks per page"
@@ -21,8 +22,7 @@
 
 <script>
 import { uid } from "quasar";
-import { mapGetters } from "vuex";
-const util = require("util");
+import { mapGetters, mapActions } from "vuex";
 export default {
   data() {
     return {
@@ -55,7 +55,7 @@ export default {
   computed: {
     ...mapGetters("main", ["getChunks"]),
     data() {
-      return Object.values(this.getChunks);
+      return Object.values(this.getChunks); // convert to an array of objects {id, text, url}
     }
   },
   watch: {
@@ -76,6 +76,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions("main", ["addChunk"]),
     getSelectedString() {
       // there is a @selection event
       return this.selected.length === 0
@@ -105,8 +106,8 @@ export default {
           url: parcel.content.url
         };
         console.log(chunk);
-        console.log(self.data); // cannot use this.data as the this context is not correct somehow.
-        self.data.push(chunk);
+        self.addChunk(chunk); // cannot use 'this' as the 'this' context is not correct somehow.
+        console.log(self.getChunks);
         sendResponse({ id: id });
       }
     });

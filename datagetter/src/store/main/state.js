@@ -1,13 +1,13 @@
-// const defaultState = () => {
-//   return {
-//     chunks: {}
-//   };
-// };
+const defaultState = () => {
+  return {
+    chunks: {}
+  };
+};
 
-// const state = defaultState();
+const state = defaultState();
 
 export default function() {
   return {
-    chunks: {}
+    state
   };
 }

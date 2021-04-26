@@ -9,9 +9,18 @@ export function initData({ commit }) {
   Storage.get("chunks")
     .then(res => {
       console.log(res);
-      commit("setChunks", res);
+      if (res) {
+        commit("setChunks", res);
+      } else {
+        commit("setChunks", {});
+      }
     })
     .catch(() => {
       commit("setChunks", {});
     });
+}
+
+export function addChunk({ commit }, chunk) {
+  // commit("addChunk", { [chunk.id]: chunk });
+  commit("addChunk", chunk);
 }

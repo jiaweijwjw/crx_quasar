@@ -17,7 +17,7 @@
       chrome.runtime.sendMessage(parcel, res => {
         chrome.storage.sync.get(["chunks"], function(results) {
           let chunkObj = results["chunks"] ? results["chunks"] : {}; // value = obj[key]
-          let newChunk = { [res.id]: { text, url } }; // es6 computed property names
+          let newChunk = { [res.id]: { id: res.id, text, url } }; // es6 computed property names
           Object.assign(chunkObj, newChunk);
           chrome.storage.sync.set({ ["chunks"]: chunkObj }, function() {
             console.log("id from quasar: " + res.id);
