@@ -4,7 +4,8 @@ import Storage from "../services/storage.access";
 
 const defaultState = () => {
   return {
-    chunks: {}
+    chunks: {},
+    selectedChunks: []
   };
 };
 
@@ -24,6 +25,9 @@ const mutations = {
     // Object.assign(state.chunks, chunk);
     // state.chunks = { ...state.chunks, [chunk.id]: chunk };
     Vue.set(state.chunks, chunk.id, chunk);
+  },
+  setSelectedChunks(state, selection) {
+    state.selectedChunks = selection;
   }
 };
 
@@ -48,12 +52,21 @@ const actions = {
   addChunk({ commit }, chunk) {
     // commit("addChunk", { [chunk.id]: chunk });
     commit("addChunk", chunk);
+  },
+  setSelectedChunks({ commit }, selection) {
+    commit("setSelectedChunks", selection);
   }
 };
 
 const getters = {
   getChunks: state => {
     return state.chunks;
+  },
+  getSelectedChunks: state => {
+    return state.selectedChunks;
+  },
+  getSelectedChunksIds: state => {
+    return state.selectedChunks.map(chunk => chunk.id);
   }
 };
 

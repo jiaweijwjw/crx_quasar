@@ -15,6 +15,9 @@
       />
     </q-page-sticky>
     <div class="page-item" v-if="drawerStatusToggle">
+      <table-actions />
+    </div>
+    <div class="page-item" v-if="drawerStatusToggle">
       <collected-data-table />
     </div>
   </q-page>
@@ -22,12 +25,14 @@
 
 <script>
 import CollectedDataTable from "components/CollectedDataTable.vue";
+import TableActions from "src/components/TableActions.vue";
 import Storage from "../services/storage.access";
 
 export default {
   name: "BrowserDrawerPage",
   components: {
-    CollectedDataTable
+    CollectedDataTable,
+    TableActions
   },
   data() {
     return {

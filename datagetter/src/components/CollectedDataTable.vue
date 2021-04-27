@@ -4,8 +4,8 @@
       :data="data"
       :columns="columns"
       :row-key="row => row.id"
-      dark
       dense
+      dark
       :visible-columns="visibleColumns"
       color="primary"
       rows-per-page-label="Chunks per page"
@@ -26,7 +26,6 @@ import { mapGetters, mapActions } from "vuex";
 export default {
   data() {
     return {
-      selected: [],
       pagination: {
         rowsPerPage: 5
       },
@@ -53,30 +52,32 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("main", ["getChunks"]),
+    ...mapGetters("main", ["getChunks", "getSelectedChunks"]),
     data() {
       return Object.values(this.getChunks); // convert to an array of objects {id, text, url}
+    },
+    selected: {
+      get: function() {
+        return this.getSelectedChunks;
+      },
+      set: function(newSelection) {
+        this.setSelectedChunks(newSelection);
+      }
     }
   },
   watch: {
     selected: function(newSelection, oldSelection) {
       if (newSelection.length === 0) {
         console.log("clear selection");
-        this.$emit("clearSelection");
+        console.log(this.selected);
       } else if (newSelection.length > 0) {
         console.log("emit new selections");
-        let selectedProjsId = this.selected.map(proj => proj.id);
-        this.$emit("updateSelection", selectedProjsId);
-      }
-    },
-    isCleared: function(newVal, OldVal) {
-      if (newVal === true) {
-        this.selected = [];
+        console.log(this.selected);
       }
     }
   },
   methods: {
-    ...mapActions("main", ["addChunk"]),
+    ...mapActions("main", ["addChunk", "setSelectedChunks"]),
     getSelectedString() {
       // there is a @selection event
       return this.selected.length === 0
