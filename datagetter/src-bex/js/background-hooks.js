@@ -40,9 +40,8 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
 
   bridge.on("storage.remove", event => {
     const payload = event.data;
-    chrome.storage.sync.remove(payload.key, () => {
-      console.log("Removing data background side: " + payload.data);
-      bridge.send(event.eventResponseKey, payload.data);
+    chrome.storage.sync.remove(payload.keys, () => {
+      bridge.send(event.eventResponseKey);
     });
   });
 

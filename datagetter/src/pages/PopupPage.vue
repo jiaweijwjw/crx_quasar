@@ -15,6 +15,7 @@
       <q-btn label="testSetStorage" @click="testSetStorage('say', 'fuckkk')" />
       <q-btn label="testGetStorage" @click="testGetStorage('say')" />
       <q-btn label="testGetAll" @click="testGetAllStorage" />
+      <q-btn label="testDeleteStorage" @click="testDeleteStorage" />
     </div>
   </q-page>
 </template>
@@ -53,6 +54,9 @@ export default {
         console.log(res);
       });
     },
+    testDeleteStorage() {
+      Storage.delete("say");
+    },
     async initialLoad() {
       Storage.get("appStatusToggle").then(res => {
         console.log("initialload, app is: " + res);
@@ -68,8 +72,7 @@ export default {
   },
   async created() {
     await this.initialLoad();
-  },
-  beforeDestroy() {}
+  }
 };
 </script>
 <style lang="sass" scoped>

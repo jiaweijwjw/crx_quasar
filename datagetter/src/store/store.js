@@ -9,6 +9,20 @@ const defaultState = () => {
   };
 };
 
+const updateChunks = (newChunks = null) => {
+  if (newChunks === null) {
+    return {
+      chunks: {},
+      selectedChunks: []
+    };
+  } else {
+    return {
+      chunks: newChunks,
+      selectedChunks: []
+    };
+  }
+};
+
 const state = defaultState();
 
 const mutations = {
@@ -19,15 +33,18 @@ const mutations = {
   },
   setChunks(state, chunks) {
     state.chunks = Object.assign({}, state.chunks, chunks);
-    // state.chunks = chunks;
   },
   addChunk(state, chunk) {
-    // Object.assign(state.chunks, chunk);
-    // state.chunks = { ...state.chunks, [chunk.id]: chunk };
     Vue.set(state.chunks, chunk.id, chunk);
   },
   setSelectedChunks(state, selection) {
     state.selectedChunks = selection;
+  },
+  deleteAllChunks(state) {
+    Object.assign(state, updateChunks()); // have to do this to maintain reactivity
+  },
+  deleteChunks(state, chunksAfterDeletion) {
+    Object.assign(state, updateChunks(chunksAfterDeletion));
   }
 };
 
@@ -50,11 +67,29 @@ const actions = {
       });
   },
   addChunk({ commit }, chunk) {
-    // commit("addChunk", { [chunk.id]: chunk });
     commit("addChunk", chunk);
   },
   setSelectedChunks({ commit }, selection) {
     commit("setSelectedChunks", selection);
+  },
+  deleteAllChunks({ commit }) {
+    Storage.deleteAllChunks().then(() => {
+      commit("deleteChunks");
+    });
+  },
+  async deleteChunks({ commit, getters }, selection) {
+    // selection is an array of strings of the id of the selected chunks
+    const removeProperties = async () => {
+      let cloneChunks = { ...getters["getChunks"] }; // cannot directly assign the getters["getChunks"]
+      for (let i = 0; i < selection.length; i++) {
+        delete cloneChunks[selection[i]];
+      }
+      return cloneChunks;
+    };
+    let chunksAfterDeletion = await removeProperties();
+    Storage.updateChunks(chunksAfterDeletion).then(() => {
+      commit("deleteChunks", chunksAfterDeletion);
+    });
   }
 };
 

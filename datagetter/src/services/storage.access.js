@@ -1,8 +1,6 @@
 export default {
   /**
-   * This will ask for ALL items from chrome storage and return only the ones we're interested in.
    * An empty list or object will return an empty result object. Pass in null to get the entire contents of storage.
-   * @param type
    */
   getAll() {
     return this.get(null).then(allItems => {
@@ -13,9 +11,6 @@ export default {
   },
 
   /**
-   * Use the bridge to contact the background BEX script and get a given key from BEX storage.
-   * @param key
-   * @param id
    * @returns {Promise<unknown>}
    */
   get(key, id = null) {
@@ -29,9 +24,6 @@ export default {
   },
 
   /**
-   * Use the bridge to contact the background BEX script and save a given key to the BEX storage.
-   * @param key
-   * @param data
    * @returns {Promise<unknown>}
    */
   save(key, data) {
@@ -41,15 +33,25 @@ export default {
     });
   },
 
+  deleteAllChunks() {
+    return this.delete("chunks");
+  },
+
   /**
-   * Use the bridge to contact the background BEX script and delete a given key from BEX storage.
-   * @param key
-   * @param id
+   * uses chrome.storage.sync.set as all our chunks are stored in 1 single "chunk" key
+   * chrome.storage API only gives access to top level keys
+   */
+  updateChunks(newChunks) {
+    return this.save("chunks", newChunks);
+  },
+
+  /**
    * @returns {Promise<unknown>}
    */
-  delete(key, id) {
+  delete(key, id = null) {
+    const useKey = id ? `${key}.${id}` : key;
     return window.QBexBridge.send("storage.remove", {
-      key: `${key}.${id}`
+      keys: useKey // `${key}.${id}`
     }).then(event => {
       console.log("Removing data popup side: " + event.data);
     });
