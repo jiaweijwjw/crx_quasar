@@ -3,10 +3,27 @@
     <q-btn
       dense
       label="download selected"
-      @click="save('selected')"
+      @click="save('selected', 'txt')"
       color="cyan"
     />
-    <q-btn dense label="download all" @click="save('all')" color="cyan" />
+    <q-btn
+      dense
+      label="download all"
+      @click="save('all', 'txt')"
+      color="cyan"
+    />
+    <q-btn
+      dense
+      label="download selected as csv"
+      @click="save('selected', 'csv')"
+      color="magenta"
+    />
+    <q-btn
+      dense
+      label="download all as csv"
+      @click="save('all', 'csv')"
+      color="magenta"
+    />
     <q-btn
       dense
       label="delete selected"
@@ -20,24 +37,42 @@
 <script>
 import { saveAs } from "file-saver";
 import { mapGetters, mapActions } from "vuex";
+// import { tableActionsOptionsEnum } from "../boot/enums";
 export default {
+  // created() {
+  //   console.log(tableActionsOptionsEnum);
+  // },
   data() {
     return {};
   },
   methods: {
     ...mapActions("main", ["deleteChunks", "deleteAllChunks"]),
-    async save(quantityStr) {
+    async save(saveType, fileType) {
       let collated = [];
-      if (quantityStr === "all") {
-        collated = await this.collateChunks(Object.values(this.getChunks));
+      let options = {};
+      let fileName = "";
+      if (fileType === "txt") {
+        options = { type: "text/plain;charset=utf-8" };
+        fileName = "default.txt";
+        if (saveType === "all") {
+          collated = await this.collateChunks(Object.values(this.getChunks));
+        }
+        if (saveType === "selected") {
+          collated = await this.collateChunks(this.getSelectedChunks);
+        }
       }
-      if (quantityStr === "selected") {
-        collated = await this.collateChunks(this.getSelectedChunks);
+      if (fileType === "csv") {
+        options = { type: "data:text/csv;charset=utf-8" };
+        fileName = "default.csv";
+        if (saveType === "all") {
+          collated = await this.collateChunksCSV(Object.values(this.getChunks));
+        }
+        if (saveType === "selected") {
+          collated = await this.collateChunksCSV(this.getSelectedChunks);
+        }
       }
-      let blob = new Blob([collated], {
-        type: "text/plain;charset=utf-8"
-      });
-      saveAs(blob, "default.txt");
+      let blob = new Blob([collated], options);
+      saveAs(blob, fileName);
     },
     async collateChunks(chunksToCollate) {
       let selectedTextArray = chunksToCollate.map(chunk => chunk.text);
@@ -50,11 +85,32 @@ export default {
       }
       return collated;
     },
-    remove(quantityStr) {
-      if (quantityStr === "selected") {
+    async collateChunksCSV(chunksToCollate) {
+      // chunksToCollate is an array of {id, text, url} objects
+      let title = "Text, Url \n";
+      let collated = title.concat(
+        chunksToCollate.map(chunk => chunk.text + "," + chunk.url).join("\n")
+      );
+      return collated;
+    },
+    // async saveAsCSV(quantityStr) {
+    //   let collated = [];
+    //   if (quantityStr === "all") {
+    //     collated = await this.collateChunksCSV(Object.values(this.getChunks));
+    //   }
+    //   if (quantityStr === "selected") {
+    //     collated = await this.collateChunksCSV(this.getSelectedChunks);
+    //   }
+    //   let blob = new Blob([collated], {
+    //     type: "data:text/csv;charset=utf-8"
+    //   });
+    //   saveAs(blob, "default.csv");
+    // },
+    remove(removeType) {
+      if (removeType === "selected") {
         this.deleteChunks(this.getSelectedChunks.map(chunk => chunk.id));
       }
-      if (quantityStr === "all") {
+      if (removeType === "all") {
         this.deleteAllChunks();
       }
     }
