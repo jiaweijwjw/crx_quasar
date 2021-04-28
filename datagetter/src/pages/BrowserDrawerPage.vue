@@ -3,6 +3,12 @@
     class="flex flex-center"
     :class="drawerStatusToggle ? 'q-page-shown' : 'q-page-hidden'"
   >
+    <div class="page-item" v-if="drawerStatusToggle">
+      <table-actions />
+    </div>
+    <div class="page-item" v-if="drawerStatusToggle">
+      <collected-data-table />
+    </div>
     <q-page-sticky :position="drawerStatusToggle ? 'top' : 'bottom'">
       <q-btn
         dense
@@ -10,16 +16,10 @@
         flat
         size="xs"
         :icon="drawerStatusToggle ? 'expand_more' : 'expand_less'"
-        :class="drawerStatusToggle ? 'sticky-btn-shown' : 'sticky-btn-hidden'"
+        class="sticky-btn"
         @click="toggleDrawer"
       />
     </q-page-sticky>
-    <div class="page-item" v-if="drawerStatusToggle">
-      <table-actions />
-    </div>
-    <div class="page-item" v-if="drawerStatusToggle">
-      <collected-data-table />
-    </div>
   </q-page>
 </template>
 
@@ -82,9 +82,7 @@ export default {
 .page-item
   display: block
   width: 90%
-.sticky-btn-shown
-  color: $cream
-.sticky-btn-hidden
+.sticky-btn
   background-color: $background
   color: $cream
 </style>
