@@ -93,19 +93,6 @@ export default {
       );
       return collated;
     },
-    // async saveAsCSV(quantityStr) {
-    //   let collated = [];
-    //   if (quantityStr === "all") {
-    //     collated = await this.collateChunksCSV(Object.values(this.getChunks));
-    //   }
-    //   if (quantityStr === "selected") {
-    //     collated = await this.collateChunksCSV(this.getSelectedChunks);
-    //   }
-    //   let blob = new Blob([collated], {
-    //     type: "data:text/csv;charset=utf-8"
-    //   });
-    //   saveAs(blob, "default.csv");
-    // },
     remove(removeType) {
       if (removeType === "selected") {
         this.deleteChunks(this.getSelectedChunks.map(chunk => chunk.id));

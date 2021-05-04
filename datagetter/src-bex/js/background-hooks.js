@@ -72,9 +72,7 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
     }
     bridge.send(event.eventResponseKey);
   });
-  chrome.runtime.onInstalled.addListener(() => {
-    console.log("runtime oninstalled");
-  });
+
   // Every tab will trigger this
   chrome.storage.onChanged.addListener(function(changes, namespace) {
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {

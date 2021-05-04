@@ -89,10 +89,98 @@ export default function attachContentHooks(bridge) {
     }
     bridge.send(event.eventResponseKey);
   });
+
+  if (document.domain === "facebook.com") {
+    const newsFeed = document.querySelector('[role="feed"]');
+    console.log(newsFeed);
+  }
 }
 
 (function() {
   // IIFE. When the page loads, insert the browser extension code.
   iFrame.src = chrome.runtime.getURL("www/index.html");
   document.body.prepend(iFrame);
+  chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
+    console.log(
+      sender.tab
+        ? "from a content script:" + sender.tab.url
+        : "from the extension"
+    );
+    if (parcel.message == "get.post.data") {
+      let top, middle, bottom;
+      // What if not in the main facebook page?
+      const newsFeed = document.querySelector('[role="feed"]'); // theres no point querying this if we are not going to reference it in future.
+      const posts = newsFeed.querySelectorAll('[data-pagelet^="FeedUnit"]');
+      console.log("number of posts: " + posts.length);
+      for (var value of posts.values()) {
+        console.log(value);
+      }
+      for (let i = 0; i < posts.length; i++) {
+        // somehow FeedUnit_1 is always empty, not pointing to the second post.
+        if (i == 1) {
+          continue;
+        }
+        console.log(i);
+        let post = posts[i];
+        const postCommonParent = post.querySelector(
+          "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div"
+        );
+        const childrenArray = Array.from(
+          postCommonParent.childNodes
+        ).filter(node => node.hasChildNodes()); // childrenArray consists of the header (top), body (middle) and footer (bottom) of a post.
+        (top = childrenArray[0]),
+          (middle = childrenArray[1]),
+          (bottom = childrenArray[2]);
+        // const author = top.querySelectorAll("span:last-of-type");
+        // console.log(author);
+        const commentsSection = bottom.querySelector(
+          "div.stjgntxs.ni8dbmo4.l82x9zwi.uo3d90p7.h905i5nu.monazrh9 > div > div.cwj9ozl2.tvmbv18p > ul"
+        );
+        console.log(commentsSection); // an unordered list
+        if (commentsSection && commentsSection.children.length !== 0) {
+          let children = commentsSection.children;
+          for (let i = 0; i < children.length; i++) {
+            const individualCommentCommonParent = children[i].querySelector(
+              "div > div.l9j0dhe7.ecm0bbzt.rz4wbd8a.qt6c0cv9.dati1w0a.j83agx80.btwxx1t3.lzcic4wl[role='article'] > div.rj1gh0hx.buofh1pr.ni8dbmo4.stjgntxs.hv4rvrfc > div > div.q9uorilb.bvz0fpym.c1et5uql.sf5mxxl7 > div > div > div.b3i9ofy5.e72ty7fz.qlfml3jp.inkptoze.qmr60zad.rq0escxv.oo9gr5id.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.d2edcug0.jm1wdb64.l9j0dhe7.l3itjdph.qv66sw1b > div.tw6a2znq.sj5x9vvc.d1544ag0.cxgpxx05"
+            );
+            if (individualCommentCommonParent) {
+              // .childNodes with return nodelist including comment type node. using .children will return a HTMLCollection which will only include the div and span
+              const commentor = individualCommentCommonParent.children[0].querySelector(
+                "span.pq6dq46d > span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.lrazzd5p.oo9gr5id[dir='auto']"
+              ).textContent;
+              const comment = individualCommentCommonParent.children[1].querySelector(
+                "div.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.c1et5uql > div[dir='auto']"
+              ).textContent;
+              console.log("commentor: " + commentor);
+              console.log("comment: " + comment);
+            }
+          }
+        }
+      }
+      sendResponse({ msg: "test" });
+    }
+  });
+  // chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
+  //   console.log(
+  //     sender.tab
+  //       ? "from a content script:" + sender.tab.url
+  //       : "from the extension"
+  //   );
+  //   if (parcel.message == "get.post.data") {
+  //     const commentsSection = document.getElementsByClassName(
+  //       "cwj9ozl2 tvmbv18p"
+  //     );
+  //     const chatbubble = commentsSection[0].getElementsByClassName(
+  //       "tw6a2znq sj5x9vvc d1544ag0 cxgpxx05"
+  //     );
+  //     console.log(chatbubble);
+  //     const comments = commentsSection[0].getElementsByClassName(
+  //       "kvgmc6g5 cxmmr5t8 oygrvhab hcukyx3x c1et5uql"
+  //     );
+  //     for (let i = 0; i < comments.length; i++) {
+  //       console.log(comments[i].firstChild.textContent);
+  //     }
+  //     sendResponse({ msg: "test" });
+  //   }
+  // });
 })();
