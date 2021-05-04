@@ -58,6 +58,90 @@ const initBrowserApp = (initialAppStatusToggle, initialDrawerStatusToggle) => {
   }
 };
 
+const setupMutationObserver = targetNode => {
+  const config = { childList: true };
+  const callback = function(mutationRecordsArray, observer) {
+    mutationRecordsArray.forEach(mutation => {
+      switch (mutation.type) {
+        case "childList":
+          console.log("in mutation");
+          if (mutation.addedNodes.length !== 0) {
+            for (let i = 0; i < mutation.addedNodes.length; i++) {
+              console.log(mutation.addedNodes[i]);
+              if (mutation.addedNodes[i].hasAttributes()) {
+                let attrs = mutation.addedNodes[i].attributes; // element.attributes is a NamedNodeMap, not an array.
+                for (let y = attrs.length - 1; y >= 0; y--) {
+                  if (
+                    attrs[y].name === "data-pagelet" &&
+                    attrs[y].value === "FeedUnit_1"
+                  ) {
+                    break;
+                  } else if (attrs[y].name === "data-pagelet") {
+                    renderAddPostButton(mutation.addedNodes[i]);
+                  } else {
+                    continue;
+                  }
+                }
+              }
+            }
+          }
+          break;
+      }
+    });
+  };
+  const observer = new MutationObserver(callback);
+  observer.observe(targetNode, config);
+  // observer.disconnect();
+};
+
+const renderAddPostButton = post => {
+  let top, middle, bottom;
+  let postCommonParent = post.querySelector(
+    "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div"
+  );
+  if (postCommonParent) {
+    // .childNodes returns a Live Nodelist
+    let childrenArray = Array.from(postCommonParent.childNodes).filter(node =>
+      node.hasChildNodes()
+    ); // childrenArray consists of the header (top), body (middle) and footer (bottom) of a post.
+    (top = childrenArray[0]),
+      (middle = childrenArray[1]),
+      (bottom = childrenArray[2]);
+
+    let linkToOpenPostInOwnPage = top.querySelector(
+      "span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.knj5qynh.m9osqain.hzawbc8m[dir='auto'] > span[id^='jsc']"
+    );
+    const elclicker = document.createElement("span");
+    const textnode = document.createTextNode("ADD THIS POST");
+    Object.assign(elclicker.style, {
+      color: "yellow",
+      backgroundColor: "blue",
+      border: "thick solid #000000",
+      fontSize: "small",
+      cursor: "pointer",
+      marginRight: "8px"
+    });
+    elclicker.appendChild(textnode);
+    // bridge is available as parent scope variable
+    // it works, but the question remains if it is a recommended way of event processing from DOM to Quasar webpage
+    elclicker.onclick = event => {
+      console.log("click elclicker");
+      // const elanchor = event.target.nextElementSibling;
+      // const url = elanchor.href;
+      // const title = elanchor.innerText;
+      // const ldata = {};
+      // ldata[url] = { url, title, checked: true };
+      // bridge.send("webpage.getTable.return", { links: ldata });
+    };
+    linkToOpenPostInOwnPage.parentNode.insertBefore(
+      elclicker,
+      linkToOpenPostInOwnPage
+    );
+  } else {
+    console.log("cant find postCommonParent");
+  }
+};
+
 export default function attachContentHooks(bridge) {
   bridge.send("initial.get", { msg: "getInitialStatuses" }).then(res => {
     console.log(
@@ -90,9 +174,31 @@ export default function attachContentHooks(bridge) {
     bridge.send(event.eventResponseKey);
   });
 
-  if (document.domain === "facebook.com") {
-    const newsFeed = document.querySelector('[role="feed"]');
-    console.log(newsFeed);
+  if (
+    document.domain === "facebook.com" &&
+    document.readyState === "interactive"
+  ) {
+    // querySelectorAll returns a Static Nodelist. So we have to requery the DOM when there are changes. (When there are more posts loaded.)
+    // the nodes/elements are live, it is the Nodelist returned by querySelectorAll() that is Static.
+    const newsFeed = document.querySelector('[role="feed"]'); // theres no point querying this if we are not going to reference it in future.
+    setupMutationObserver(newsFeed);
+    const posts = newsFeed.querySelectorAll('[data-pagelet^="FeedUnit"]');
+    // const posts = document.querySelectorAll(
+    //   'div[role="feed"] > [data-pagelet^="FeedUnit"]'
+    // );
+    console.log("number of posts: " + posts.length);
+    for (var value of posts.values()) {
+      console.log(value);
+    }
+    for (let i = 0; i < posts.length; i++) {
+      // somehow FeedUnit_1 is always empty, not pointing to the second post. Post number 2 onwards starts from index 2.
+      if (i == 1) {
+        continue;
+      }
+      console.log(i);
+      let post = posts[i];
+      renderAddPostButton(post);
+    }
   }
 }
 

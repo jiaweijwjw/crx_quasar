@@ -83,6 +83,7 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
       if (key === "appStatusToggle" && namespace === "sync") {
         console.log("newvalue: " + newValue);
         if (newValue === true) {
+          // if (newValue) {} else {}
           bridge.send("app.status", {
             onApp: true
           });
