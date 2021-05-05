@@ -64,19 +64,16 @@ const setupMutationObserver = targetNode => {
     mutationRecordsArray.forEach(mutation => {
       switch (mutation.type) {
         case "childList":
-          console.log("in mutation");
           if (mutation.addedNodes.length !== 0) {
             for (let i = 0; i < mutation.addedNodes.length; i++) {
               console.log(mutation.addedNodes[i]);
               if (mutation.addedNodes[i].hasAttributes()) {
                 let attrs = mutation.addedNodes[i].attributes; // element.attributes is a NamedNodeMap, not an array.
                 for (let y = attrs.length - 1; y >= 0; y--) {
-                  if (
-                    attrs[y].name === "data-pagelet" &&
-                    attrs[y].value === "FeedUnit_1"
-                  ) {
-                    break;
-                  } else if (attrs[y].name === "data-pagelet") {
+                  if (attrs[y].name === "data-pagelet") {
+                    if (attrs[y].value === "FeedUnit_1") {
+                      break;
+                    }
                     renderAddPostButton(mutation.addedNodes[i]);
                   } else {
                     continue;
@@ -92,6 +89,49 @@ const setupMutationObserver = targetNode => {
   const observer = new MutationObserver(callback);
   observer.observe(targetNode, config);
   // observer.disconnect();
+};
+
+const getPostData = event => {
+  let top, middle, bottom;
+  const postCommonParent = event.target.closest(
+    "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div"
+  );
+  if (postCommonParent) {
+    console.log(postCommonParent);
+    const childrenArray = Array.from(postCommonParent.childNodes).filter(node =>
+      node.hasChildNodes()
+    ); // childrenArray consists of the header (top), body (middle) and footer (bottom) of a post.
+    (top = childrenArray[0]),
+      (middle = childrenArray[1]),
+      (bottom = childrenArray[2]);
+    // const author = top.querySelectorAll("span:last-of-type");
+    // console.log(author);
+    const commentsSection = bottom.querySelector(
+      "div.stjgntxs.ni8dbmo4.l82x9zwi.uo3d90p7.h905i5nu.monazrh9 > div > div.cwj9ozl2.tvmbv18p > ul"
+    );
+    console.log(commentsSection); // an unordered list
+    if (commentsSection && commentsSection.children.length !== 0) {
+      let children = commentsSection.children;
+      for (let i = 0; i < children.length; i++) {
+        const individualCommentCommonParent = children[i].querySelector(
+          "div > div.l9j0dhe7.ecm0bbzt.rz4wbd8a.qt6c0cv9.dati1w0a.j83agx80.btwxx1t3.lzcic4wl[role='article'] > div.rj1gh0hx.buofh1pr.ni8dbmo4.stjgntxs.hv4rvrfc > div > div.q9uorilb.bvz0fpym.c1et5uql.sf5mxxl7 > div > div > div.b3i9ofy5.e72ty7fz.qlfml3jp.inkptoze.qmr60zad.rq0escxv.oo9gr5id.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.d2edcug0.jm1wdb64.l9j0dhe7.l3itjdph.qv66sw1b > div.tw6a2znq.sj5x9vvc.d1544ag0.cxgpxx05"
+        );
+        if (individualCommentCommonParent) {
+          // .childNodes with return nodelist including comment type node. using .children will return a HTMLCollection which will only include the div and span
+          const commentor = individualCommentCommonParent.children[0].querySelector(
+            "span.pq6dq46d > span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.lrazzd5p.oo9gr5id[dir='auto']"
+          ).textContent;
+          const comment = individualCommentCommonParent.children[1].querySelector(
+            "div.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.c1et5uql > div[dir='auto']"
+          ).textContent;
+          console.log("commentor: " + commentor);
+          console.log("comment: " + comment);
+        }
+      }
+    }
+  } else {
+    console.log("cant find common parent.");
+  }
 };
 
 const renderAddPostButton = post => {
@@ -111,30 +151,29 @@ const renderAddPostButton = post => {
     let linkToOpenPostInOwnPage = top.querySelector(
       "span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.knj5qynh.m9osqain.hzawbc8m[dir='auto'] > span[id^='jsc']"
     );
-    const elclicker = document.createElement("span");
-    const textnode = document.createTextNode("ADD THIS POST");
-    Object.assign(elclicker.style, {
-      color: "yellow",
-      backgroundColor: "blue",
-      border: "thick solid #000000",
+    const btnEl = document.createElement("span");
+    const textNode = document.createTextNode("ADD THIS POST");
+    Object.assign(btnEl.style, {
+      color: "#d33682",
+      backgroundColor: "#002b36",
+      border: "medium ridge #073642",
       fontSize: "small",
+      boxShadow: "1px 1px 2px 0px #000",
       cursor: "pointer",
-      marginRight: "8px"
+      margin: "0 3px 0 0",
+      padding: "0 3px 0 3px",
+      textAlign: "centre"
     });
-    elclicker.appendChild(textnode);
+    // btnEl.classList.add("btnEl"); somehow cannot detect the class from content-css.css
+    btnEl.appendChild(textNode);
     // bridge is available as parent scope variable
     // it works, but the question remains if it is a recommended way of event processing from DOM to Quasar webpage
-    elclicker.onclick = event => {
-      console.log("click elclicker");
-      // const elanchor = event.target.nextElementSibling;
-      // const url = elanchor.href;
-      // const title = elanchor.innerText;
-      // const ldata = {};
-      // ldata[url] = { url, title, checked: true };
-      // bridge.send("webpage.getTable.return", { links: ldata });
+    // have to pass the bridge in though
+    btnEl.onclick = event => {
+      getPostData(event);
     };
     linkToOpenPostInOwnPage.parentNode.insertBefore(
-      elclicker,
+      btnEl,
       linkToOpenPostInOwnPage
     );
   } else {
@@ -213,80 +252,10 @@ export default function attachContentHooks(bridge) {
         : "from the extension"
     );
     if (parcel.message == "get.post.data") {
-      let top, middle, bottom;
-      // What if not in the main facebook page?
-      const newsFeed = document.querySelector('[role="feed"]'); // theres no point querying this if we are not going to reference it in future.
-      const posts = newsFeed.querySelectorAll('[data-pagelet^="FeedUnit"]');
-      console.log("number of posts: " + posts.length);
-      for (var value of posts.values()) {
-        console.log(value);
-      }
-      for (let i = 0; i < posts.length; i++) {
-        // somehow FeedUnit_1 is always empty, not pointing to the second post.
-        if (i == 1) {
-          continue;
-        }
-        console.log(i);
-        let post = posts[i];
-        const postCommonParent = post.querySelector(
-          "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div"
-        );
-        const childrenArray = Array.from(
-          postCommonParent.childNodes
-        ).filter(node => node.hasChildNodes()); // childrenArray consists of the header (top), body (middle) and footer (bottom) of a post.
-        (top = childrenArray[0]),
-          (middle = childrenArray[1]),
-          (bottom = childrenArray[2]);
-        // const author = top.querySelectorAll("span:last-of-type");
-        // console.log(author);
-        const commentsSection = bottom.querySelector(
-          "div.stjgntxs.ni8dbmo4.l82x9zwi.uo3d90p7.h905i5nu.monazrh9 > div > div.cwj9ozl2.tvmbv18p > ul"
-        );
-        console.log(commentsSection); // an unordered list
-        if (commentsSection && commentsSection.children.length !== 0) {
-          let children = commentsSection.children;
-          for (let i = 0; i < children.length; i++) {
-            const individualCommentCommonParent = children[i].querySelector(
-              "div > div.l9j0dhe7.ecm0bbzt.rz4wbd8a.qt6c0cv9.dati1w0a.j83agx80.btwxx1t3.lzcic4wl[role='article'] > div.rj1gh0hx.buofh1pr.ni8dbmo4.stjgntxs.hv4rvrfc > div > div.q9uorilb.bvz0fpym.c1et5uql.sf5mxxl7 > div > div > div.b3i9ofy5.e72ty7fz.qlfml3jp.inkptoze.qmr60zad.rq0escxv.oo9gr5id.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.d2edcug0.jm1wdb64.l9j0dhe7.l3itjdph.qv66sw1b > div.tw6a2znq.sj5x9vvc.d1544ag0.cxgpxx05"
-            );
-            if (individualCommentCommonParent) {
-              // .childNodes with return nodelist including comment type node. using .children will return a HTMLCollection which will only include the div and span
-              const commentor = individualCommentCommonParent.children[0].querySelector(
-                "span.pq6dq46d > span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.lrazzd5p.oo9gr5id[dir='auto']"
-              ).textContent;
-              const comment = individualCommentCommonParent.children[1].querySelector(
-                "div.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.c1et5uql > div[dir='auto']"
-              ).textContent;
-              console.log("commentor: " + commentor);
-              console.log("comment: " + comment);
-            }
-          }
-        }
-      }
-      sendResponse({ msg: "test" });
+      console.log(
+        "contextmenu was clicked and an event was sent from background to content-hooks."
+      );
+      sendResponse({ msg: "test response" });
     }
   });
-  // chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
-  //   console.log(
-  //     sender.tab
-  //       ? "from a content script:" + sender.tab.url
-  //       : "from the extension"
-  //   );
-  //   if (parcel.message == "get.post.data") {
-  //     const commentsSection = document.getElementsByClassName(
-  //       "cwj9ozl2 tvmbv18p"
-  //     );
-  //     const chatbubble = commentsSection[0].getElementsByClassName(
-  //       "tw6a2znq sj5x9vvc d1544ag0 cxgpxx05"
-  //     );
-  //     console.log(chatbubble);
-  //     const comments = commentsSection[0].getElementsByClassName(
-  //       "kvgmc6g5 cxmmr5t8 oygrvhab hcukyx3x c1et5uql"
-  //     );
-  //     for (let i = 0; i < comments.length; i++) {
-  //       console.log(comments[i].firstChild.textContent);
-  //     }
-  //     sendResponse({ msg: "test" });
-  //   }
-  // });
 })();

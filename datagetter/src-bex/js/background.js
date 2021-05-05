@@ -51,8 +51,8 @@
   chrome.contextMenus.create({
     title: "Add Post Data",
     contexts: ["all"],
-    onclick: onClickAddPostData
-    // documentUrlPatterns: ["*://*.facebook.com/*"]
+    onclick: onClickAddPostData,
+    documentUrlPatterns: ["*://*.facebook.com/*"]
   });
 })();
 

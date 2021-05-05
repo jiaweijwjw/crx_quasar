@@ -13,5 +13,12 @@
   left: 47% !important;
 }
 
-/* display: block;
-  margin: auto; */
+/* unused */
+.btnEl {
+  color: "yellow";
+  background-color: "blue";
+  border: "thick solid #000000";
+  font-size: "small";
+  cursor: "pointer";
+  margin-right: "8px";
+}
