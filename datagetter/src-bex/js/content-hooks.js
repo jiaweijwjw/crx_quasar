@@ -245,17 +245,17 @@ export default function attachContentHooks(bridge) {
   // IIFE. When the page loads, insert the browser extension code.
   iFrame.src = chrome.runtime.getURL("www/index.html");
   document.body.prepend(iFrame);
-  chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
-    console.log(
-      sender.tab
-        ? "from a content script:" + sender.tab.url
-        : "from the extension"
-    );
-    if (parcel.message == "get.post.data") {
-      console.log(
-        "contextmenu was clicked and an event was sent from background to content-hooks."
-      );
-      sendResponse({ msg: "test response" });
-    }
-  });
+  // chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
+  //   console.log(
+  //     sender.tab
+  //       ? "from a content script:" + sender.tab.url
+  //       : "from the extension"
+  //   );
+  //   if (parcel.message == "get.post.data") {
+  //     console.log(
+  //       "contextmenu was clicked and an event was sent from background to content-hooks."
+  //     );
+  //     sendResponse({ msg: "test response" });
+  //   }
+  // });
 })();
