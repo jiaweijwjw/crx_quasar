@@ -1,7 +1,8 @@
 import Vue from "vue";
 import Vuex from "vuex";
 
-import main from "./store";
+import chunkstore from "./store-chunk";
+import fbpoststore from "./store-fbpost";
 
 Vue.use(Vuex);
 
@@ -10,7 +11,8 @@ let store = null;
 export default function(/* { ssrContext } */) {
   store = new Vuex.Store({
     modules: {
-      main
+      chunkstore,
+      fbpoststore
     },
 
     // enable strict mode (adds overhead!)

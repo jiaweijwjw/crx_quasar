@@ -73,6 +73,7 @@
 <script>
 import { mapActions } from "vuex";
 import Storage from "../services/storage.access";
+import { uid } from "quasar";
 export default {
   name: "BrowserLayout",
   data() {
@@ -88,7 +89,7 @@ export default {
         {
           icon: "facebook",
           label: "Add FB Post",
-          route: "AddFBPostPage"
+          route: "AddFbPostPage"
         }
       ],
       thumbStyle: {
@@ -97,7 +98,8 @@ export default {
     };
   },
   methods: {
-    ...mapActions("main", ["initData"]),
+    ...mapActions("chunkstore", ["initChunkData", "addChunk"]),
+    ...mapActions("fbpoststore", ["initPostData", "addPost"]),
     async initCrxSettings() {
       Storage.get("drawerStatusToggle").then(res => {
         console.log("initialload, drawer is: " + res);
@@ -116,8 +118,69 @@ export default {
     }
   },
   async created() {
-    await this.initData();
+    await this.initChunkData();
+    await this.initPostData();
     await this.initCrxSettings();
+
+    let self = this;
+
+    chrome.runtime.onMessage.addListener(function(
+      parcel,
+      sender,
+      sendResponse
+    ) {
+      // from backgroundscript contextmenu
+      console.log(
+        sender.tab
+          ? "from a content script:" + sender.tab.url
+          : "from the extension"
+      );
+      if (parcel.message == "new.chunk.added") {
+        let id = uid();
+        let chunk = {
+          id,
+          text: parcel.content.text,
+          url: parcel.content.url
+        };
+        console.log(chunk);
+        self.addChunk(chunk); // cannot use 'this' as the 'this' context is not correct somehow.
+        sendResponse({ id: id });
+      }
+    });
+
+    chrome.runtime.onMessage.addListener(function(
+      parcel,
+      sender,
+      sendResponse
+    ) {
+      // from contentscript: facebook.com
+      console.log(
+        sender.tab
+          ? "from a content script:" + sender.tab.url
+          : "from the extension"
+      );
+      if (parcel.message == "new.fb.post.added") {
+        console.log(parcel.content);
+        let id = uid();
+        let post = {
+          id,
+          author: parcel.content.author,
+          originalPostText: parcel.content.originalPostText,
+          comments: parcel.content.comments
+        };
+        console.log(post);
+        let successfulSave = null;
+        self
+          .addPost(post)
+          .then(() => {
+            successfulSave = true;
+          })
+          .catch(() => {
+            successfulSave = false;
+          }); // cannot use 'this' as the 'this' context is not correct somehow.
+        sendResponse({ message: successfulSave ? "success" : "fail" });
+      }
+    });
   }
 };
 </script>
@@ -135,10 +198,14 @@ export default {
   background-color: transparent
   color: $text-color
   width: 2vw
+  min-width: 25px
   height: 10vw
+  min-height: 100px
 .open-sidedrawer-btn
   background-color: $background2
   color: $text-color
   width: 2vw
+  min-width: 25px
   height: 10vw
+  min-height: 100px
 </style>

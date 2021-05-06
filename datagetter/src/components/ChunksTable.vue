@@ -21,9 +21,9 @@
 </template>
 
 <script>
-import { uid } from "quasar";
 import { mapGetters, mapActions } from "vuex";
 export default {
+  name: "CollectedTableData",
   data() {
     return {
       pagination: {
@@ -52,7 +52,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("main", ["getChunks", "getSelectedChunks"]),
+    ...mapGetters("chunkstore", ["getChunks", "getSelectedChunks"]),
     data() {
       return Object.values(this.getChunks); // convert to an array of objects {id, text, url}
     },
@@ -77,7 +77,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions("main", ["addChunk", "setSelectedChunks"]),
+    ...mapActions("chunkstore", ["setSelectedChunks"]),
     getSelectedString() {
       // there is a @selection event
       return this.selected.length === 0
@@ -86,32 +86,6 @@ export default {
             this.selected.length > 1 ? "s" : ""
           } selected of ${this.data.length}`;
     }
-  },
-  created() {
-    let self = this;
-    chrome.runtime.onMessage.addListener(function(
-      parcel,
-      sender,
-      sendResponse
-    ) {
-      console.log(
-        sender.tab
-          ? "from a content script:" + sender.tab.url
-          : "from the extension"
-      );
-      if (parcel.message == "new.chunk.added") {
-        let id = uid();
-        let chunk = {
-          id,
-          text: parcel.content.text,
-          url: parcel.content.url
-        };
-        console.log(chunk);
-        self.addChunk(chunk); // cannot use 'this' as the 'this' context is not correct somehow.
-        console.log(self.getChunks);
-        sendResponse({ id: id });
-      }
-    });
   }
 };
 </script>

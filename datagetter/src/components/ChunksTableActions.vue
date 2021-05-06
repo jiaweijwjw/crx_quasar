@@ -37,16 +37,14 @@
 <script>
 import { saveAs } from "file-saver";
 import { mapGetters, mapActions } from "vuex";
-// import { tableActionsOptionsEnum } from "../boot/enums";
+// import { chunksTableActionsOptionsEnum } from "../boot/enums";
 export default {
-  // created() {
-  //   console.log(tableActionsOptionsEnum);
-  // },
+  name: "ChunksTableActions",
   data() {
     return {};
   },
   methods: {
-    ...mapActions("main", ["deleteChunks", "deleteAllChunks"]),
+    ...mapActions("chunkstore", ["deleteChunks", "deleteAllChunks"]),
     async save(saveType, fileType) {
       let collated = [];
       let options = {};
@@ -103,7 +101,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters("main", ["getChunks", "getSelectedChunks"])
+    ...mapGetters("chunkstore", ["getChunks", "getSelectedChunks"])
   }
 };
 </script>

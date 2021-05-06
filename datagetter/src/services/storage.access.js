@@ -25,6 +25,16 @@ export default {
 
   /**
    * @returns {Promise<unknown>}
+   * getAllPost instead of getAll().filter() because deletion from object by key in background-hooks > filtering the array and deleting the keys which are not posts.
+   */
+  getAllPosts() {
+    return window.QBexBridge.send("storage.get.all.posts", {}).then(event => {
+      return event.data;
+    });
+  },
+
+  /**
+   * @returns {Promise<unknown>}
    */
   save(key, data) {
     return window.QBexBridge.send("storage.set", { key, data }).then(event => {
@@ -33,10 +43,21 @@ export default {
     });
   },
 
+  /**
+   * @returns {Promise<unknown>}
+   */
+  addPost(post) {
+    return this.save(post.id, post);
+  },
+
   deleteAllChunks() {
     return this.delete("chunks");
   },
 
+  deletePosts(postsToDeleteIds) {
+    // array of strings of ids
+    return this.delete(postsToDeleteIds);
+  },
   /**
    * uses chrome.storage.sync.set as all our chunks are stored in 1 single "chunk" key
    * chrome.storage API only gives access to top level keys

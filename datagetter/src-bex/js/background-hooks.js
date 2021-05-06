@@ -9,7 +9,8 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
       //getAll()
       chrome.storage.sync.get(null, items => {
         const results = [];
-
+        // The bridge also does some work to split large data which is too big to be transmitted
+        // in one go due to the browser extension 60mb data transfer limit. In order for this to happen, the payload must be an array.
         // Group the items up into an array to take advantage of the bridge's chunk splitting.
         for (const itemKey in items) {
           results.push(items[itemKey]); // value = obj[key]
@@ -23,6 +24,21 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
         bridge.send(event.eventResponseKey, items[payload.key]);
       });
     }
+  });
+
+  bridge.on("storage.get.all.posts", event => {
+    chrome.storage.sync.get(null, items => {
+      // items is an object of objects (key: value in chrome.storage)
+      const results = [];
+      delete items.chunks;
+      delete items.appStatusToggle;
+      delete items.drawerStatusToggle;
+      for (const itemKey in items) {
+        results.push(items[itemKey]); // value = obj[key]
+      }
+      console.log("Getting all data background side: " + results);
+      bridge.send(event.eventResponseKey, results);
+    });
   });
 
   bridge.on("storage.set", event => {
@@ -40,9 +56,21 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
 
   bridge.on("storage.remove", event => {
     const payload = event.data;
-    chrome.storage.sync.remove(payload.keys, () => {
+    if (payload.keys === null) {
+      let storageObj;
+      const keysToKeep = ["appStatusToggle", "drawerStatusToggle", "chunks"];
+      chrome.storage.sync.get(keysToKeep, itemsToKeep => {
+        storageObj = Object.assign({}, itemsToKeep);
+      });
+      chrome.storage.sync.clear();
+      console.log(storageObj);
+      chrome.storage.sync.set(storageObj);
       bridge.send(event.eventResponseKey);
-    });
+    } else {
+      chrome.storage.sync.remove(payload.keys, () => {
+        bridge.send(event.eventResponseKey);
+      });
+    }
   });
 
   bridge.on("initial.get", event => {

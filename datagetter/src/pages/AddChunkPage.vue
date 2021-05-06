@@ -1,24 +1,24 @@
 <template>
   <q-page class="flex flex-center" v-if="drawerStatusToggle">
     <div class="page-item">
-      <table-actions />
+      <chunks-table-actions />
     </div>
     <div class="page-item">
-      <collected-data-table />
+      <chunks-table />
     </div>
   </q-page>
 </template>
 
 <script>
-import CollectedDataTable from "components/CollectedDataTable.vue";
-import TableActions from "src/components/TableActions.vue";
+import ChunksTable from "src/components/ChunksTable.vue";
+import ChunksTableActions from "src/components/ChunksTableActions.vue";
 
 export default {
   name: "AddChunkPage",
   props: ["drawerStatusToggle"],
   components: {
-    CollectedDataTable,
-    TableActions
+    ChunksTable,
+    ChunksTableActions
   },
   data() {
     return {};

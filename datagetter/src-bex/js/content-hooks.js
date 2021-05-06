@@ -1,13 +1,13 @@
 // Hooks added here have a bridge allowing communication between the BEX Content Script and the Quasar Application.
 // console.logs here will show in the webpage dev tools console.
-const util = require("util");
+const util = require("util"); // for logging purposes only
 let drawerStatusToggle = null;
 
 const iFrame = document.createElement("iframe");
 iFrame.id = "datagetter-iframe";
 iFrame.name = ""; // name attribute is to differentiate between the drawer state.
 
-// somehow it is not automatically injected like the docs said. so we inject the css stylesheet ourselves.
+// somehow it is not automatically injected like the quasar docs said. so we inject the css stylesheet ourselves.
 const link = document.createElement("link");
 link.href = "./css/content-css.css";
 link.type = "text/css";
@@ -58,6 +58,9 @@ const initBrowserApp = (initialAppStatusToggle, initialDrawerStatusToggle) => {
   }
 };
 
+// setup the mutation observer to look for any changes in the target node 'newsFeed'
+// this is because the facebook webpage never fully loads but instead loads more posts as the user scrolls down.
+// we are only interested to look at whether there are new childnodes which are fb posts.
 const setupMutationObserver = targetNode => {
   const config = { childList: true };
   const callback = function(mutationRecordsArray, observer) {
@@ -93,6 +96,9 @@ const setupMutationObserver = targetNode => {
 
 const getPostData = event => {
   let top, middle, bottom;
+  let author = "";
+  let originalPostText = "assign a fixed string for now.";
+  let comments = [];
   const postCommonParent = event.target.closest(
     "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div"
   );
@@ -101,11 +107,15 @@ const getPostData = event => {
     const childrenArray = Array.from(postCommonParent.childNodes).filter(node =>
       node.hasChildNodes()
     ); // childrenArray consists of the header (top), body (middle) and footer (bottom) of a post.
-    (top = childrenArray[0]),
-      (middle = childrenArray[1]),
-      (bottom = childrenArray[2]);
-    // const author = top.querySelectorAll("span:last-of-type");
-    // console.log(author);
+    top = childrenArray[0];
+    middle = childrenArray[1];
+    bottom = childrenArray[2];
+    author =
+      top.querySelector("h4[id^='jsc']").querySelector("span").textContent ||
+      `unable to get author's name`;
+    console.log(author);
+    // originalPostText = getLeafNodes(middle);
+    // console.log(originalPostText);
     const commentsSection = bottom.querySelector(
       "div.stjgntxs.ni8dbmo4.l82x9zwi.uo3d90p7.h905i5nu.monazrh9 > div > div.cwj9ozl2.tvmbv18p > ul"
     );
@@ -121,17 +131,58 @@ const getPostData = event => {
           const commentor = individualCommentCommonParent.children[0].querySelector(
             "span.pq6dq46d > span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.lrazzd5p.oo9gr5id[dir='auto']"
           ).textContent;
-          const comment = individualCommentCommonParent.children[1].querySelector(
+          const said = individualCommentCommonParent.children[1].querySelector(
             "div.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.c1et5uql > div[dir='auto']"
           ).textContent;
           console.log("commentor: " + commentor);
-          console.log("comment: " + comment);
+          console.log("said: " + said);
+          let comment = {
+            commentor,
+            said
+          };
+          comments.push(comment);
         }
       }
     }
   } else {
     console.log("cant find common parent.");
   }
+  sendPostToCrx(author, originalPostText, comments);
+};
+
+const sendPostToCrx = (author, originalPostText, comments) => {
+  let parcel = {
+    message: "new.fb.post.added",
+    content: {
+      author,
+      originalPostText,
+      comments
+    }
+  };
+  chrome.runtime.sendMessage(parcel, res => {
+    console.log(res);
+  });
+};
+
+const getLeafNodes = targetNode => {
+  var nodes = Array.prototype.slice.call(
+    targetNode.getElementsByTagName("*"),
+    0
+  );
+  var leafNodes = nodes.filter(function(elem) {
+    if (elem.hasChildNodes()) {
+      // see if any of the child nodes are elements
+      for (var i = 0; i < elem.childNodes.length; i++) {
+        if (elem.childNodes[i].nodeType == 1) {
+          // there is a child element, so return false to not include
+          // this parent element
+          return false;
+        }
+      }
+    }
+    return true;
+  });
+  return leafNodes;
 };
 
 const renderAddPostButton = post => {
@@ -245,17 +296,4 @@ export default function attachContentHooks(bridge) {
   // IIFE. When the page loads, insert the browser extension code.
   iFrame.src = chrome.runtime.getURL("www/index.html");
   document.body.prepend(iFrame);
-  // chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
-  //   console.log(
-  //     sender.tab
-  //       ? "from a content script:" + sender.tab.url
-  //       : "from the extension"
-  //   );
-  //   if (parcel.message == "get.post.data") {
-  //     console.log(
-  //       "contextmenu was clicked and an event was sent from background to content-hooks."
-  //     );
-  //     sendResponse({ msg: "test response" });
-  //   }
-  // });
 })();

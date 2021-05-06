@@ -1,14 +1,24 @@
 <template>
   <q-page class="flex flex-center" v-if="drawerStatusToggle">
-    <h1>Add FB Post Page</h1>
+    <div class="page-item">
+      <fb-posts-table-actions />
+    </div>
+    <div class="page-item">
+      <fb-posts-table />
+    </div>
   </q-page>
 </template>
 
 <script>
+import FbPostsTable from "components/FbPostsTable.vue";
+import FbPostsTableActions from "src/components/FbPostsTableActions.vue";
 export default {
-  name: "AddFBPostPage",
+  name: "AddFbPostPage",
   props: ["drawerStatusToggle"],
-  components: {},
+  components: {
+    FbPostsTable,
+    FbPostsTableActions
+  },
   data() {
     return {};
   },

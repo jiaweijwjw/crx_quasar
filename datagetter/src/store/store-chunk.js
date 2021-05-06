@@ -40,9 +40,9 @@ const mutations = {
   setSelectedChunks(state, selection) {
     state.selectedChunks = selection;
   },
-  deleteAllChunks(state) {
-    Object.assign(state, updateChunks()); // have to do this to maintain reactivity
-  },
+  // deleteAllChunks(state) {
+  //   Object.assign(state, updateChunks()); // have to do this to maintain reactivity
+  // },
   deleteChunks(state, chunksAfterDeletion) {
     Object.assign(state, updateChunks(chunksAfterDeletion));
   }
@@ -52,15 +52,11 @@ const actions = {
   resetState({ commit }) {
     commit("resetState");
   },
-  initData({ commit }) {
+  initChunkData({ commit }) {
     Storage.get("chunks")
       .then(res => {
         console.log(res);
-        if (res) {
-          commit("setChunks", res);
-        } else {
-          commit("setChunks", {});
-        }
+        commit("setChunks", res);
       })
       .catch(() => {
         commit("setChunks", {});

@@ -2,7 +2,7 @@
 import BrowserLayout from "layouts/BrowserLayout.vue";
 import PopupLayout from "layouts/PopupLayout.vue";
 import AddChunkPage from "pages/AddChunkPage.vue";
-import AddFBPostPage from "pages/AddFBPostPage.vue";
+import AddFbPostPage from "src/pages/AddFbPostPage.vue";
 import PopupPage from "pages/PopupPage.vue";
 import Error404 from "pages/Error404.vue";
 
@@ -11,9 +11,9 @@ const routes = [
     path: "/",
     component: BrowserLayout,
     children: [
-      { path: "/", redirect: "/addchunk" },
+      { path: "/", redirect: "/addpost" },
       { name: "AddChunkPage", path: "/addchunk", component: AddChunkPage },
-      { name: "AddFBPostPage", path: "/addpost", component: AddFBPostPage }
+      { name: "AddFbPostPage", path: "/addpost", component: AddFbPostPage }
     ]
   },
   {
