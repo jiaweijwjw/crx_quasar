@@ -159,6 +159,10 @@ export default {
           ? "from a content script:" + sender.tab.url
           : "from the extension"
       );
+      /* from chrome docs:
+    This function becomes invalid when the event listener returns, unless you return true from the event listener to indicate you wish to
+    send a response asynchronously (this will keep the message channel open to the other end until sendResponse is called).
+     */
       if (parcel.message == "new.fb.post.added") {
         console.log(parcel.content);
         let id = uid();
@@ -169,16 +173,15 @@ export default {
           comments: parcel.content.comments
         };
         console.log(post);
-        let successfulSave = null;
         self
           .addPost(post)
           .then(() => {
-            successfulSave = true;
+            sendResponse({ message: "success" });
           })
           .catch(() => {
-            successfulSave = false;
+            sendResponse({ message: "fail" });
           }); // cannot use 'this' as the 'this' context is not correct somehow.
-        sendResponse({ message: successfulSave ? "success" : "fail" });
+        return true; // return true to indicate we will be sending a response asynchronously.
       }
     });
   }

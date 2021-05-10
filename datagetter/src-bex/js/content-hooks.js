@@ -1,7 +1,16 @@
 // Hooks added here have a bridge allowing communication between the BEX Content Script and the Quasar Application.
+// Still, is it better to use chrome message parsing or bridge?
 // console.logs here will show in the webpage dev tools console.
 const util = require("util"); // for logging purposes only
 let drawerStatusToggle = null;
+let appStatusToggle = null;
+const POST_COMMON_PARENT_PATH =
+  "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div";
+
+const whichFacebookViewEnum = Object.freeze({
+  NEWSFEED: 1,
+  PAGE: 2
+});
 
 const iFrame = document.createElement("iframe");
 iFrame.id = "datagetter-iframe";
@@ -12,15 +21,13 @@ const link = document.createElement("link");
 link.href = "./css/content-css.css";
 link.type = "text/css";
 link.rel = "stylesheet";
-document.head.appendChild(link); // document.getElementsByTagName("head")[0].appendChild(link);
+document.head.appendChild(link);
 
 // Style the iframe (common settings) and giving it an initial style attribute.
 Object.assign(iFrame.style, {
   right: "0",
   bottom: "0",
   left: "0",
-  // display: "block",
-  // margin: "0",
   border: "0",
   position: "fixed",
   zIndex: "2147483001",
@@ -61,7 +68,7 @@ const initBrowserApp = (initialAppStatusToggle, initialDrawerStatusToggle) => {
 // setup the mutation observer to look for any changes in the target node 'newsFeed'
 // this is because the facebook webpage never fully loads but instead loads more posts as the user scrolls down.
 // we are only interested to look at whether there are new childnodes which are fb posts.
-const setupMutationObserver = targetNode => {
+const setupMutationObserver = (targetNode, view) => {
   const config = { childList: true };
   const callback = function(mutationRecordsArray, observer) {
     mutationRecordsArray.forEach(mutation => {
@@ -69,19 +76,41 @@ const setupMutationObserver = targetNode => {
         case "childList":
           if (mutation.addedNodes.length !== 0) {
             for (let i = 0; i < mutation.addedNodes.length; i++) {
-              console.log(mutation.addedNodes[i]);
-              if (mutation.addedNodes[i].hasAttributes()) {
-                let attrs = mutation.addedNodes[i].attributes; // element.attributes is a NamedNodeMap, not an array.
-                for (let y = attrs.length - 1; y >= 0; y--) {
-                  if (attrs[y].name === "data-pagelet") {
-                    if (attrs[y].value === "FeedUnit_1") {
+              switch (view) {
+                case whichFacebookViewEnum.NEWSFEED:
+                  if (mutation.addedNodes[i].hasAttributes()) {
+                    let attrs = mutation.addedNodes[i].attributes; // element.attributes is a NamedNodeMap, not an array.
+                    for (let y = attrs.length - 1; y >= 0; y--) {
+                      if (attrs[y].name === "data-pagelet") {
+                        if (attrs[y].value === "FeedUnit_1") {
+                          break; // stop checking the other attributes already.
+                        } else {
+                          renderAddPostButton(mutation.addedNodes[i]);
+                        }
+                      } else {
+                        continue; // the current attribute does not tell any information whether this addedNode is a new post, so continue checking.
+                      }
+                    }
+                  }
+                  break;
+                case whichFacebookViewEnum.PAGE:
+                  const isPostClasses = [
+                    "du4w35lb",
+                    "k4urcfbm",
+                    "l9j0dhe7",
+                    "sjgh65i0"
+                  ];
+                  let classesInNode = mutation.addedNodes[i].classList;
+                  if (classesInNode.length !== 4) {
+                    break;
+                  }
+                  for (let z = isPostClasses.length - 1; z >= 0; z--) {
+                    if (classesInNode.contains(isPostClasses[z])) {
                       break;
                     }
-                    renderAddPostButton(mutation.addedNodes[i]);
-                  } else {
-                    continue;
                   }
-                }
+                  renderAddPostButton(mutation.addedNodes[i]);
+                  break;
               }
             }
           }
@@ -185,11 +214,11 @@ const getLeafNodes = targetNode => {
   return leafNodes;
 };
 
-const renderAddPostButton = post => {
+const renderAddPostButton = postCommonParent => {
   let top, middle, bottom;
-  let postCommonParent = post.querySelector(
-    "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div"
-  );
+  // let postCommonParent = post.querySelector(
+  //   "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div"
+  // );
   if (postCommonParent) {
     // .childNodes returns a Live Nodelist
     let childrenArray = Array.from(postCommonParent.childNodes).filter(node =>
@@ -232,6 +261,58 @@ const renderAddPostButton = post => {
   }
 };
 
+const initFacebookApp = () => {
+  {
+    let postContainer = { el: null, view: null };
+    let posts = null;
+    // querySelectorAll returns a Static Nodelist. So we have to requery the DOM when there are changes. (When there are more posts loaded.)
+    // the nodes/elements are live, it is the Nodelist returned by querySelectorAll() that is Static.
+    const newsFeed = document.querySelector('[role="feed"]');
+    const pageFeed = document.querySelector(
+      "div.dp1hu0rb.d2edcug0.taijpn5t.j83agx80.gs1a9yip > div.k4urcfbm.dp1hu0rb.d2edcug0.cbu4d94t.j83agx80.bp9cbjyn[role='main'] > div.k4urcfbm"
+    );
+    console.log(newsFeed);
+    console.log(pageFeed);
+    if (newsFeed) {
+      postContainer.el = newsFeed;
+      postContainer.view = whichFacebookViewEnum.NEWSFEED;
+    }
+    if (pageFeed) {
+      postContainer.el = pageFeed;
+      postContainer.view = whichFacebookViewEnum.PAGE;
+    }
+    if (!newsFeed && !pageFeed) {
+      console.log("unable to get newsfeed or page data.");
+      return;
+    }
+    setupMutationObserver(postContainer.el, postContainer.view);
+    // can find other ways to check which facebook view is it?
+    if (postContainer.view === whichFacebookViewEnum.NEWSFEED) {
+      posts = newsFeed.querySelectorAll('[data-pagelet^="FeedUnit"]');
+    }
+    if (postContainer.view === whichFacebookViewEnum.PAGE) {
+      posts = pageFeed.querySelectorAll("div.lzcic4wl[role='article']");
+    }
+    if (!posts) {
+      console.log("unable to get posts.");
+      return;
+    }
+    console.log("number of posts: " + posts.length);
+    for (let value of posts.values()) {
+      console.log(value);
+    }
+    for (let i = 0; i < posts.length; i++) {
+      // somehow FeedUnit_1 is always empty, not pointing to the second post. Post number 2 onwards starts from index 2.
+      if (i == 1) {
+        continue;
+      }
+      console.log(i);
+      let post = posts[i];
+      renderAddPostButton(post.querySelector(POST_COMMON_PARENT_PATH));
+    }
+  }
+};
+
 export default function attachContentHooks(bridge) {
   bridge.send("initial.get", { msg: "getInitialStatuses" }).then(res => {
     console.log(
@@ -239,6 +320,7 @@ export default function attachContentHooks(bridge) {
     );
     const results = res.data;
     drawerStatusToggle = results.drawerStatusToggle;
+    appStatusToggle = results.appStatusToggle;
     initBrowserApp(results.appStatusToggle, results.drawerStatusToggle);
   });
 
@@ -256,40 +338,31 @@ export default function attachContentHooks(bridge) {
 
   bridge.on("app.status", event => {
     const payload = event.data;
+    appStatusToggle = payload.onApp;
     if (payload.onApp) {
       drawerStatusToggle ? showDrawer() : hideDrawer();
+      // if (
+      //   document.domain === "facebook.com" &&
+      //   document.readyState === "complete"
+      // ) {
+      //   initFacebookApp();
+      // }
     } else {
       offApp();
     }
     bridge.send(event.eventResponseKey);
   });
 
-  if (
-    document.domain === "facebook.com" &&
-    document.readyState === "interactive"
-  ) {
-    // querySelectorAll returns a Static Nodelist. So we have to requery the DOM when there are changes. (When there are more posts loaded.)
-    // the nodes/elements are live, it is the Nodelist returned by querySelectorAll() that is Static.
-    const newsFeed = document.querySelector('[role="feed"]'); // theres no point querying this if we are not going to reference it in future.
-    setupMutationObserver(newsFeed);
-    const posts = newsFeed.querySelectorAll('[data-pagelet^="FeedUnit"]');
-    // const posts = document.querySelectorAll(
-    //   'div[role="feed"] > [data-pagelet^="FeedUnit"]'
-    // );
-    console.log("number of posts: " + posts.length);
-    for (var value of posts.values()) {
-      console.log(value);
+  document.onreadystatechange = function() {
+    if (
+      document.readyState === "complete" &&
+      document.domain === "facebook.com" &&
+      appStatusToggle
+    ) {
+      // For now have to refresh the page after toggling on/off on extension popup
+      initFacebookApp();
     }
-    for (let i = 0; i < posts.length; i++) {
-      // somehow FeedUnit_1 is always empty, not pointing to the second post. Post number 2 onwards starts from index 2.
-      if (i == 1) {
-        continue;
-      }
-      console.log(i);
-      let post = posts[i];
-      renderAddPostButton(post);
-    }
-  }
+  };
 }
 
 (function() {
