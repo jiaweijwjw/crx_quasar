@@ -4,9 +4,30 @@
 const util = require("util"); // for logging purposes only
 let drawerStatusToggle = null;
 let appStatusToggle = null;
-const POST_COMMON_PARENT_PATH =
+const SELECTOR_TO_POST_COMMON_PARENT =
   "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div";
-
+const SELECTOR_TO_ADDPOST_BTN_SIBLING =
+  "span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.knj5qynh.m9osqain.hzawbc8m[dir='auto'] > span[id^='jsc']";
+const CLASSES_IF_IS_POST_ON_PAGE = [
+  "du4w35lb",
+  "k4urcfbm",
+  "l9j0dhe7",
+  "sjgh65i0"
+];
+const SELECTOR_TO_NEWSFEED = "[role='feed']";
+const SELECTOR_TO_PAGEFEED =
+  "div.dp1hu0rb.d2edcug0.taijpn5t.j83agx80.gs1a9yip > div.k4urcfbm.dp1hu0rb.d2edcug0.cbu4d94t.j83agx80.bp9cbjyn[role='main'] > div.k4urcfbm";
+const addPostBtnStyle = {
+  color: "#d33682",
+  backgroundColor: "#002b36",
+  border: "medium ridge #073642",
+  fontSize: "small",
+  boxShadow: "1px 1px 2px 0px #000",
+  cursor: "pointer",
+  margin: "0 3px 0 0",
+  padding: "0 3px 0 3px",
+  textAlign: "centre"
+};
 const whichFacebookViewEnum = Object.freeze({
   NEWSFEED: 1,
   PAGE: 2
@@ -65,72 +86,12 @@ const initBrowserApp = (initialAppStatusToggle, initialDrawerStatusToggle) => {
   }
 };
 
-// setup the mutation observer to look for any changes in the target node 'newsFeed'
-// this is because the facebook webpage never fully loads but instead loads more posts as the user scrolls down.
-// we are only interested to look at whether there are new childnodes which are fb posts.
-const setupMutationObserver = (targetNode, view) => {
-  const config = { childList: true };
-  const callback = function(mutationRecordsArray, observer) {
-    mutationRecordsArray.forEach(mutation => {
-      switch (mutation.type) {
-        case "childList":
-          if (mutation.addedNodes.length !== 0) {
-            for (let i = 0; i < mutation.addedNodes.length; i++) {
-              switch (view) {
-                case whichFacebookViewEnum.NEWSFEED:
-                  if (mutation.addedNodes[i].hasAttributes()) {
-                    let attrs = mutation.addedNodes[i].attributes; // element.attributes is a NamedNodeMap, not an array.
-                    for (let y = attrs.length - 1; y >= 0; y--) {
-                      if (attrs[y].name === "data-pagelet") {
-                        if (attrs[y].value === "FeedUnit_1") {
-                          break; // stop checking the other attributes already.
-                        } else {
-                          renderAddPostButton(mutation.addedNodes[i]);
-                        }
-                      } else {
-                        continue; // the current attribute does not tell any information whether this addedNode is a new post, so continue checking.
-                      }
-                    }
-                  }
-                  break;
-                case whichFacebookViewEnum.PAGE:
-                  const isPostClasses = [
-                    "du4w35lb",
-                    "k4urcfbm",
-                    "l9j0dhe7",
-                    "sjgh65i0"
-                  ];
-                  let classesInNode = mutation.addedNodes[i].classList;
-                  if (classesInNode.length !== 4) {
-                    break;
-                  }
-                  for (let z = isPostClasses.length - 1; z >= 0; z--) {
-                    if (classesInNode.contains(isPostClasses[z])) {
-                      break;
-                    }
-                  }
-                  renderAddPostButton(mutation.addedNodes[i]);
-                  break;
-              }
-            }
-          }
-          break;
-      }
-    });
-  };
-  const observer = new MutationObserver(callback);
-  observer.observe(targetNode, config);
-  // observer.disconnect();
-};
-
 const getPostData = event => {
   let top, middle, bottom;
   let author = "";
   let originalPostText = "assign a fixed string for now.";
   let comments = [];
-  const postCommonParent = event.target.closest(
-    "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div"
-  );
+  const postCommonParent = event.target.closest(SELECTOR_TO_POST_COMMON_PARENT);
   if (postCommonParent) {
     console.log(postCommonParent);
     const childrenArray = Array.from(postCommonParent.childNodes).filter(node =>
@@ -214,84 +175,127 @@ const getLeafNodes = targetNode => {
   return leafNodes;
 };
 
-const renderAddPostButton = postCommonParent => {
-  let top, middle, bottom;
-  // let postCommonParent = post.querySelector(
-  //   "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div"
-  // );
-  if (postCommonParent) {
-    // .childNodes returns a Live Nodelist
-    let childrenArray = Array.from(postCommonParent.childNodes).filter(node =>
-      node.hasChildNodes()
-    ); // childrenArray consists of the header (top), body (middle) and footer (bottom) of a post.
-    (top = childrenArray[0]),
-      (middle = childrenArray[1]),
-      (bottom = childrenArray[2]);
-
-    let linkToOpenPostInOwnPage = top.querySelector(
-      "span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.knj5qynh.m9osqain.hzawbc8m[dir='auto'] > span[id^='jsc']"
-    );
-    const btnEl = document.createElement("span");
-    const textNode = document.createTextNode("ADD THIS POST");
-    Object.assign(btnEl.style, {
-      color: "#d33682",
-      backgroundColor: "#002b36",
-      border: "medium ridge #073642",
-      fontSize: "small",
-      boxShadow: "1px 1px 2px 0px #000",
-      cursor: "pointer",
-      margin: "0 3px 0 0",
-      padding: "0 3px 0 3px",
-      textAlign: "centre"
+// setup the mutation observer to look for any changes in the target node (newsfeed or pagefeed)
+// this is because the facebook webpage never fully loads but instead loads more posts as the user scrolls down.
+// we are only interested to look at whether there are new childnodes which are fb posts.
+const setupMutationObserver = (targetNode, view) => {
+  const config = { childList: true };
+  const callback = function(mutationRecordsArray, observer) {
+    mutationRecordsArray.forEach(mutation => {
+      if (mutation.addedNodes.length === 0) return; // return in a forEach() callback is equivalent to continue in a conventional for loop.
+      switch (mutation.type) {
+        case "childList":
+          for (let i = 0; i < mutation.addedNodes.length; i++) {
+            switch (view) {
+              case whichFacebookViewEnum.NEWSFEED:
+                if (mutation.addedNodes[i].hasAttributes()) {
+                  let attrs = mutation.addedNodes[i].attributes; // element.attributes is a NamedNodeMap, not an array.
+                  for (let y = attrs.length - 1; y >= 0; y--) {
+                    if (
+                      attrs[y].name === "data-pagelet" &&
+                      attrs[y].value === "FeedUnit_1"
+                    ) {
+                      break;
+                    }
+                    if (
+                      attrs[y].name === "data-pagelet" &&
+                      attrs[y].value !== "FeedUnit_1"
+                    ) {
+                      renderAddPostButton(
+                        mutation.addedNodes[i].querySelector(
+                          SELECTOR_TO_POST_COMMON_PARENT
+                        )
+                      );
+                    }
+                  }
+                }
+                break;
+              case whichFacebookViewEnum.PAGE:
+                let classesInNode = mutation.addedNodes[i].classList;
+                if (classesInNode.length !== CLASSES_IF_IS_POST_ON_PAGE.length)
+                  break;
+                for (
+                  let z = CLASSES_IF_IS_POST_ON_PAGE.length - 1;
+                  z >= 0;
+                  z--
+                ) {
+                  if (!classesInNode.contains(CLASSES_IF_IS_POST_ON_PAGE[z])) {
+                    break;
+                  } else if (z == 0) {
+                    // all the classes present in this new addedNode matches the classes required for it to be a post.
+                    renderAddPostButton(
+                      mutation.addedNodes[i].querySelector(
+                        SELECTOR_TO_POST_COMMON_PARENT
+                      )
+                    );
+                  }
+                }
+                break;
+            }
+          }
+          break;
+      }
     });
-    // btnEl.classList.add("btnEl"); somehow cannot detect the class from content-css.css
-    btnEl.appendChild(textNode);
-    // bridge is available as parent scope variable
-    // it works, but the question remains if it is a recommended way of event processing from DOM to Quasar webpage
-    // have to pass the bridge in though
-    btnEl.onclick = event => {
-      getPostData(event);
-    };
-    linkToOpenPostInOwnPage.parentNode.insertBefore(
-      btnEl,
-      linkToOpenPostInOwnPage
-    );
-  } else {
-    console.log("cant find postCommonParent");
-  }
+  };
+  const observer = new MutationObserver(callback);
+  observer.observe(targetNode, config);
+  // observer.disconnect();
+};
+
+const renderAddPostButton = postCommonParent => {
+  if (!postCommonParent) return;
+  let top, middle, bottom; // header, body, footer
+  let childrenArray = Array.from(postCommonParent.childNodes).filter(node =>
+    node.hasChildNodes()
+  );
+  top = childrenArray[0];
+  middle = childrenArray[1];
+  bottom = childrenArray[2];
+  let linkToOpenPostInOwnPage = top.querySelector(
+    SELECTOR_TO_ADDPOST_BTN_SIBLING // the addpost button will be rendered beside this element (on the left).
+  );
+  const btnEl = document.createElement("span");
+  const textNode = document.createTextNode("ADD THIS POST");
+  Object.assign(btnEl.style, addPostBtnStyle);
+  // btnEl.classList.add("btnEl"); somehow cannot detect the class from content-css.css
+  btnEl.appendChild(textNode);
+  btnEl.onclick = event => {
+    getPostData(event);
+  };
+  linkToOpenPostInOwnPage.parentNode.insertBefore(
+    btnEl,
+    linkToOpenPostInOwnPage
+  );
 };
 
 const initFacebookApp = () => {
   {
-    let postContainer = { el: null, view: null };
+    let postsContainer = { el: null, view: null }; // for knowing which kind of page to render the addpost btn. E.g the homepage newsfeed
     let posts = null;
-    // querySelectorAll returns a Static Nodelist. So we have to requery the DOM when there are changes. (When there are more posts loaded.)
-    // the nodes/elements are live, it is the Nodelist returned by querySelectorAll() that is Static.
-    const newsFeed = document.querySelector('[role="feed"]');
-    const pageFeed = document.querySelector(
-      "div.dp1hu0rb.d2edcug0.taijpn5t.j83agx80.gs1a9yip > div.k4urcfbm.dp1hu0rb.d2edcug0.cbu4d94t.j83agx80.bp9cbjyn[role='main'] > div.k4urcfbm"
-    );
-    console.log(newsFeed);
-    console.log(pageFeed);
+    const newsFeed = document.querySelector(SELECTOR_TO_NEWSFEED);
+    const pageFeed = document.querySelector(SELECTOR_TO_PAGEFEED);
     if (newsFeed) {
-      postContainer.el = newsFeed;
-      postContainer.view = whichFacebookViewEnum.NEWSFEED;
+      postsContainer.el = newsFeed;
+      postsContainer.view = whichFacebookViewEnum.NEWSFEED;
     }
     if (pageFeed) {
-      postContainer.el = pageFeed;
-      postContainer.view = whichFacebookViewEnum.PAGE;
+      postsContainer.el = pageFeed;
+      postsContainer.view = whichFacebookViewEnum.PAGE;
     }
     if (!newsFeed && !pageFeed) {
       console.log("unable to get newsfeed or page data.");
       return;
     }
-    setupMutationObserver(postContainer.el, postContainer.view);
-    // can find other ways to check which facebook view is it?
-    if (postContainer.view === whichFacebookViewEnum.NEWSFEED) {
+    setupMutationObserver(postsContainer.el, postsContainer.view);
+    // can find other ways to check which facebook view is it? can make the code more reusable if can find a way to check and pass in as params to this function.
+    if (postsContainer.view === whichFacebookViewEnum.NEWSFEED) {
       posts = newsFeed.querySelectorAll('[data-pagelet^="FeedUnit"]');
     }
-    if (postContainer.view === whichFacebookViewEnum.PAGE) {
-      posts = pageFeed.querySelectorAll("div.lzcic4wl[role='article']");
+    if (postsContainer.view === whichFacebookViewEnum.PAGE) {
+      posts = pageFeed.querySelectorAll(
+        "div.k4urcfbm > div.du4w35lb.k4urcfbm.l9j0dhe7.sjgh65i0"
+      );
+      // posts = pageFeed.querySelectorAll("div.lzcic4wl[role='article']"); // can do this also but make it same as the detected childNodes in mutation observer to make it more standardized.
     }
     if (!posts) {
       console.log("unable to get posts.");
@@ -303,12 +307,13 @@ const initFacebookApp = () => {
     }
     for (let i = 0; i < posts.length; i++) {
       // somehow FeedUnit_1 is always empty, not pointing to the second post. Post number 2 onwards starts from index 2.
-      if (i == 1) {
+      // this is only for newsfeed.
+      if (i == 1 && postsContainer.view === whichFacebookViewEnum.NEWSFEED) {
         continue;
       }
       console.log(i);
       let post = posts[i];
-      renderAddPostButton(post.querySelector(POST_COMMON_PARENT_PATH));
+      renderAddPostButton(post.querySelector(SELECTOR_TO_POST_COMMON_PARENT));
     }
   }
 };
