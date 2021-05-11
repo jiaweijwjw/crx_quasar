@@ -169,7 +169,7 @@ export default {
         let post = {
           id,
           author: parcel.content.author,
-          originalPostText: parcel.content.originalPostText,
+          postBody: parcel.content.postBody,
           comments: parcel.content.comments
         };
         console.log(post);

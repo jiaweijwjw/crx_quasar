@@ -15,6 +15,28 @@ const CLASSES_IF_IS_POST_ON_PAGE = [
   "l9j0dhe7",
   "sjgh65i0"
 ];
+const CLASSES_IF_IS_OTHER_FB_POST_BODY_PART = [
+  "cwj9ozl2",
+  "qbxu24ho",
+  "bxzzcbxg",
+  "lxuwth05",
+  "h2mp5456",
+  "ue3kfks5",
+  "pw54ja7n",
+  "uo3d90p7",
+  "l82x9zwi",
+  "goun2846",
+  "ccm00jje",
+  "s44p3ltw",
+  "mk2mc5f4",
+  "frvqaej8",
+  "ed0hlay0",
+  "afxsp9o4",
+  "jcgfde61",
+  "tvfksri0",
+  "ozuftl9m"
+];
+const CLASS_IF_IS_OWN_CONTENT_BODY_PART = "l9j0dhe7";
 const SELECTOR_TO_NEWSFEED = "[role='feed']";
 const SELECTOR_TO_PAGEFEED =
   "div.dp1hu0rb.d2edcug0.taijpn5t.j83agx80.gs1a9yip > div.k4urcfbm.dp1hu0rb.d2edcug0.cbu4d94t.j83agx80.bp9cbjyn[role='main'] > div.k4urcfbm";
@@ -26,12 +48,16 @@ const SELECTOR_TO_POST_AUTHOR =
 const SELECTOR_TO_COMMENTS_SECTION =
   "div.stjgntxs.ni8dbmo4.l82x9zwi.uo3d90p7.h905i5nu.monazrh9 > div > div.cwj9ozl2.tvmbv18p > ul";
 const SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT =
+  "div.b3i9ofy5.e72ty7fz.qlfml3jp.inkptoze.qmr60zad.rq0escxv.oo9gr5id.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.d2edcug0.jm1wdb64.l9j0dhe7.l3itjdph.qv66sw1b > div.tw6a2znq.sj5x9vvc.d1544ag0.cxgpxx05";
+const SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT2 =
   "div > div.l9j0dhe7.ecm0bbzt.rz4wbd8a.qt6c0cv9.dati1w0a.j83agx80.btwxx1t3.lzcic4wl[role='article'] > div.rj1gh0hx.buofh1pr.ni8dbmo4.stjgntxs.hv4rvrfc > div > div.q9uorilb.bvz0fpym.c1et5uql.sf5mxxl7 > div > div > div.b3i9ofy5.e72ty7fz.qlfml3jp.inkptoze.qmr60zad.rq0escxv.oo9gr5id.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.d2edcug0.jm1wdb64.l9j0dhe7.l3itjdph.qv66sw1b > div.tw6a2znq.sj5x9vvc.d1544ag0.cxgpxx05";
 const SELECTOR_TO_COMMENT_COMMENTOR =
   "span.pq6dq46d > span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.lrazzd5p.oo9gr5id[dir='auto']";
 const SELECTOR_TO_COMMENT_SAID =
   "div.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.c1et5uql > div[dir='auto']";
-
+const SELECTOR_TO_POST_BODY_OWN_CONTENT_EXT_LINK = "a[role='link']";
+const SELECTOR_TO_POST_BODY_OWN_CONTENT_VIDEO = "div[aria-label='Play video']";
+const SELECTOR_TO_POST_BODY_OTHER_FB_POST_LINK = "a[role='link']";
 const addPostBtnStyle = {
   color: "#d33682",
   backgroundColor: "#002b36",
@@ -46,6 +72,12 @@ const addPostBtnStyle = {
 const whichFacebookViewEnum = Object.freeze({
   NEWSFEED: 1,
   PAGE: 2
+});
+const postBodyPartEnum = Object.freeze({
+  TEXT: 1,
+  OTHER_FB_POST: 2,
+  OWN_CONTENT: 3,
+  UNKNOWN: 4
 });
 
 const iFrame = document.createElement("iframe");
@@ -101,11 +133,116 @@ const initBrowserApp = (initialAppStatusToggle, initialDrawerStatusToggle) => {
   }
 };
 
+const isWhichBodyPart = childOfMiddle => {
+  if (childOfMiddle.hasAttributes()) {
+    const id = childOfMiddle.getAttribute("id");
+    const classesInNode = childOfMiddle.classList;
+    const dir = childOfMiddle.getAttribute("dir");
+    if (classesInNode.length === 0 && dir === "auto") {
+      return postBodyPartEnum.TEXT;
+    } else if (id && classesInNode.length === 1) {
+      if (
+        id.startsWith("jsc") &&
+        classesInNode.contains(CLASS_IF_IS_OWN_CONTENT_BODY_PART)
+      ) {
+        return postBodyPartEnum.OWN_CONTENT;
+      }
+    } else if (
+      classesInNode.length === CLASSES_IF_IS_OTHER_FB_POST_BODY_PART.length
+    ) {
+      for (
+        let z = CLASSES_IF_IS_OTHER_FB_POST_BODY_PART.length - 1;
+        z >= 0;
+        z--
+      ) {
+        if (!classesInNode.contains(CLASSES_IF_IS_OTHER_FB_POST_BODY_PART[z])) {
+          break;
+        } else if (z == 0) {
+          return postBodyPartEnum.OTHER_FB_POST;
+        }
+      }
+      return postBodyPartEnum.UNKNOWN;
+    } else {
+      return postBodyPartEnum.UNKNOWN;
+    }
+  }
+};
+
+const digestBodyText = textChild => {
+  return textChild.textContent;
+};
+
+const digestBodyOtherFbPost = otherFbPostChild => {
+  return otherFbPostChild
+    .querySelector(SELECTOR_TO_POST_BODY_OTHER_FB_POST_LINK)
+    .getAttribute("href");
+};
+
+const digestBodyOwnContent = ownContentChild => {
+  const ext_link = ownContentChild.querySelector(
+    SELECTOR_TO_POST_BODY_OWN_CONTENT_EXT_LINK
+  );
+  const video = ownContentChild.querySelector(
+    SELECTOR_TO_POST_BODY_OWN_CONTENT_VIDEO
+  );
+  if (ext_link) {
+    return ext_link.getAttribute("href");
+  } else if (video) {
+    return "Content is a video.";
+  } else {
+    return "Unknown own content.";
+  }
+};
+
+const getAllReplies = listOfReplies => {
+  let replies = [];
+  if (listOfReplies.length === 0) {
+    return;
+  } else {
+    // length !== 0
+    for (let i = 0; i < listOfReplies.length; i++) {
+      let comment = {};
+      const individualCommentCommonParent = listOfReplies[i].querySelector(
+        SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT
+      );
+      console.log(individualCommentCommonParent);
+      const moreReplies = listOfReplies[i].children[1].querySelector("ul");
+      console.log(moreReplies);
+
+      if (individualCommentCommonParent) {
+        const commentor = individualCommentCommonParent.children[0].querySelector(
+          SELECTOR_TO_COMMENT_COMMENTOR
+        ).textContent;
+        const said = individualCommentCommonParent.children[1].querySelector(
+          SELECTOR_TO_COMMENT_SAID
+        ).textContent;
+        console.log("commentor: " + commentor);
+        console.log("said: " + said);
+        comment["commentor"] = commentor;
+        comment["said"] = said;
+      }
+
+      if (!moreReplies) {
+        replies.push(comment);
+      } else {
+        comment["replies"] = getAllReplies(moreReplies.children);
+        replies.push(comment);
+      }
+    }
+    return replies;
+  }
+};
+
 const getPostData = event => {
   let top, middle, bottom;
   let author = "";
   let originalPostText = "assign a fixed string for now.";
   let comments = [];
+  let postBody = {
+    text: null,
+    otherFbPost: null,
+    ownContent: null
+  };
   // const view = parseInt(event.target.getAttribute("view")); // unused for now
   const postCommonParent = event.target.closest(SELECTOR_TO_POST_COMMON_PARENT);
   console.log(postCommonParent);
@@ -120,73 +257,55 @@ const getPostData = event => {
     author =
       top.querySelector(SELECTOR_TO_POST_AUTHOR).querySelector("span")
         .textContent || `unable to get author's name`;
-    // originalPostText = getLeafNodes(middle);
-    // console.log(originalPostText);
+
+    for (let p = 0; p < middle.children.length; p++) {
+      const bodyPart = isWhichBodyPart(middle.children[p]);
+      switch (bodyPart) {
+        case postBodyPartEnum.TEXT:
+          console.log("text");
+          postBody.text = digestBodyText(middle.children[p]);
+          break;
+        case postBodyPartEnum.OTHER_FB_POST:
+          console.log("other fb post");
+          postBody.otherFbPost = digestBodyOtherFbPost(middle.children[p]);
+          break;
+        case postBodyPartEnum.OWN_CONTENT:
+          console.log("own content");
+          postBody.ownContent = digestBodyOwnContent(middle.children[p]);
+          break;
+        case postBodyPartEnum.UNKNOWN:
+          console.log("unknown body part");
+          break;
+        default:
+          console.log("switch statement which body part not working");
+      }
+    }
+    console.log(postBody);
     const commentsSection = bottom.querySelector(SELECTOR_TO_COMMENTS_SECTION);
     console.log(commentsSection); // an unordered list
-    if (commentsSection && commentsSection.children.length !== 0) {
-      let children = commentsSection.children;
-      for (let i = 0; i < children.length; i++) {
-        const individualCommentCommonParent = children[i].querySelector(
-          SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT
-        );
-        if (individualCommentCommonParent) {
-          // .childNodes with return nodelist including comment type node. using .children will return a HTMLCollection which will only include the div and span
-          const commentor = individualCommentCommonParent.children[0].querySelector(
-            SELECTOR_TO_COMMENT_COMMENTOR
-          ).textContent;
-          const said = individualCommentCommonParent.children[1].querySelector(
-            SELECTOR_TO_COMMENT_SAID
-          ).textContent;
-          console.log("commentor: " + commentor);
-          console.log("said: " + said);
-          let comment = {
-            commentor,
-            said
-          };
-          comments.push(comment);
-        }
-      }
+    console.log(comments);
+    if (commentsSection) {
+      comments = getAllReplies(commentsSection.children);
+      console.log(comments);
     }
   } else {
     console.log("cant find common parent.");
   }
-  sendPostToCrx(author, originalPostText, comments);
+  sendPostToCrx(author, postBody, comments);
 };
 
-const sendPostToCrx = (author, originalPostText, comments) => {
+const sendPostToCrx = (author, postBody, comments) => {
   let parcel = {
     message: "new.fb.post.added",
     content: {
       author,
-      originalPostText,
+      postBody,
       comments
     }
   };
   chrome.runtime.sendMessage(parcel, res => {
     console.log(res);
   });
-};
-
-const getLeafNodes = targetNode => {
-  var nodes = Array.prototype.slice.call(
-    targetNode.getElementsByTagName("*"),
-    0
-  );
-  var leafNodes = nodes.filter(function(elem) {
-    if (elem.hasChildNodes()) {
-      // see if any of the child nodes are elements
-      for (var i = 0; i < elem.childNodes.length; i++) {
-        if (elem.childNodes[i].nodeType == 1) {
-          // there is a child element, so return false to not include
-          // this parent element
-          return false;
-        }
-      }
-    }
-    return true;
-  });
-  return leafNodes;
 };
 
 // setup the mutation observer to look for any changes in the target node (newsfeed or pagefeed)

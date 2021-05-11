@@ -29,7 +29,7 @@ export default {
       pagination: {
         rowsPerPage: 5
       },
-      visibleColumns: ["author", "originalPostText"],
+      visibleColumns: ["author", "postText"],
       columns: [
         {
           name: "author",
@@ -41,10 +41,10 @@ export default {
           sortable: true
         },
         {
-          name: "originalPostText",
+          name: "postText",
           align: "left",
-          label: "Original Post Text",
-          field: "originalPostText",
+          label: "Post Text",
+          field: row => row.postBody.text,
           sortable: true
         }
       ]
