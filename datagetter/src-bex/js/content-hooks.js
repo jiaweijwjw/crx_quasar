@@ -4,6 +4,7 @@
 const util = require("util"); // for logging purposes only
 let drawerStatusToggle = null;
 let appStatusToggle = null;
+
 const SELECTOR_TO_POST_COMMON_PARENT =
   "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div";
 const SELECTOR_TO_ADDPOST_BTN_SIBLING =
@@ -17,6 +18,20 @@ const CLASSES_IF_IS_POST_ON_PAGE = [
 const SELECTOR_TO_NEWSFEED = "[role='feed']";
 const SELECTOR_TO_PAGEFEED =
   "div.dp1hu0rb.d2edcug0.taijpn5t.j83agx80.gs1a9yip > div.k4urcfbm.dp1hu0rb.d2edcug0.cbu4d94t.j83agx80.bp9cbjyn[role='main'] > div.k4urcfbm";
+const SELECTOR_TO_NEWSFEED_POST = "[data-pagelet^='FeedUnit']";
+const SELECTOR_TO_PAGEFEED_POST =
+  "div.k4urcfbm > div.du4w35lb.k4urcfbm.l9j0dhe7.sjgh65i0";
+const SELECTOR_TO_POST_AUTHOR =
+  ".gmql0nx0.l94mrbxd.p1ri9a11.lzcic4wl.aahdfvyu.hzawbc8m[id^='jsc'][dir='auto']";
+const SELECTOR_TO_COMMENTS_SECTION =
+  "div.stjgntxs.ni8dbmo4.l82x9zwi.uo3d90p7.h905i5nu.monazrh9 > div > div.cwj9ozl2.tvmbv18p > ul";
+const SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT =
+  "div > div.l9j0dhe7.ecm0bbzt.rz4wbd8a.qt6c0cv9.dati1w0a.j83agx80.btwxx1t3.lzcic4wl[role='article'] > div.rj1gh0hx.buofh1pr.ni8dbmo4.stjgntxs.hv4rvrfc > div > div.q9uorilb.bvz0fpym.c1et5uql.sf5mxxl7 > div > div > div.b3i9ofy5.e72ty7fz.qlfml3jp.inkptoze.qmr60zad.rq0escxv.oo9gr5id.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.d2edcug0.jm1wdb64.l9j0dhe7.l3itjdph.qv66sw1b > div.tw6a2znq.sj5x9vvc.d1544ag0.cxgpxx05";
+const SELECTOR_TO_COMMENT_COMMENTOR =
+  "span.pq6dq46d > span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.lrazzd5p.oo9gr5id[dir='auto']";
+const SELECTOR_TO_COMMENT_SAID =
+  "div.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.c1et5uql > div[dir='auto']";
+
 const addPostBtnStyle = {
   color: "#d33682",
   backgroundColor: "#002b36",
@@ -91,38 +106,37 @@ const getPostData = event => {
   let author = "";
   let originalPostText = "assign a fixed string for now.";
   let comments = [];
+  // const view = parseInt(event.target.getAttribute("view")); // unused for now
   const postCommonParent = event.target.closest(SELECTOR_TO_POST_COMMON_PARENT);
+  console.log(postCommonParent);
   if (postCommonParent) {
-    console.log(postCommonParent);
     const childrenArray = Array.from(postCommonParent.childNodes).filter(node =>
       node.hasChildNodes()
     ); // childrenArray consists of the header (top), body (middle) and footer (bottom) of a post.
+    console.log(childrenArray);
     top = childrenArray[0];
     middle = childrenArray[1];
     bottom = childrenArray[2];
     author =
-      top.querySelector("h4[id^='jsc']").querySelector("span").textContent ||
-      `unable to get author's name`;
-    console.log(author);
+      top.querySelector(SELECTOR_TO_POST_AUTHOR).querySelector("span")
+        .textContent || `unable to get author's name`;
     // originalPostText = getLeafNodes(middle);
     // console.log(originalPostText);
-    const commentsSection = bottom.querySelector(
-      "div.stjgntxs.ni8dbmo4.l82x9zwi.uo3d90p7.h905i5nu.monazrh9 > div > div.cwj9ozl2.tvmbv18p > ul"
-    );
+    const commentsSection = bottom.querySelector(SELECTOR_TO_COMMENTS_SECTION);
     console.log(commentsSection); // an unordered list
     if (commentsSection && commentsSection.children.length !== 0) {
       let children = commentsSection.children;
       for (let i = 0; i < children.length; i++) {
         const individualCommentCommonParent = children[i].querySelector(
-          "div > div.l9j0dhe7.ecm0bbzt.rz4wbd8a.qt6c0cv9.dati1w0a.j83agx80.btwxx1t3.lzcic4wl[role='article'] > div.rj1gh0hx.buofh1pr.ni8dbmo4.stjgntxs.hv4rvrfc > div > div.q9uorilb.bvz0fpym.c1et5uql.sf5mxxl7 > div > div > div.b3i9ofy5.e72ty7fz.qlfml3jp.inkptoze.qmr60zad.rq0escxv.oo9gr5id.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.d2edcug0.jm1wdb64.l9j0dhe7.l3itjdph.qv66sw1b > div.tw6a2znq.sj5x9vvc.d1544ag0.cxgpxx05"
+          SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT
         );
         if (individualCommentCommonParent) {
           // .childNodes with return nodelist including comment type node. using .children will return a HTMLCollection which will only include the div and span
           const commentor = individualCommentCommonParent.children[0].querySelector(
-            "span.pq6dq46d > span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.lrazzd5p.oo9gr5id[dir='auto']"
+            SELECTOR_TO_COMMENT_COMMENTOR
           ).textContent;
           const said = individualCommentCommonParent.children[1].querySelector(
-            "div.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.c1et5uql > div[dir='auto']"
+            SELECTOR_TO_COMMENT_SAID
           ).textContent;
           console.log("commentor: " + commentor);
           console.log("said: " + said);
@@ -204,7 +218,8 @@ const setupMutationObserver = (targetNode, view) => {
                       renderAddPostButton(
                         mutation.addedNodes[i].querySelector(
                           SELECTOR_TO_POST_COMMON_PARENT
-                        )
+                        ),
+                        view
                       );
                     }
                   }
@@ -226,7 +241,8 @@ const setupMutationObserver = (targetNode, view) => {
                     renderAddPostButton(
                       mutation.addedNodes[i].querySelector(
                         SELECTOR_TO_POST_COMMON_PARENT
-                      )
+                      ),
+                      view
                     );
                   }
                 }
@@ -242,21 +258,20 @@ const setupMutationObserver = (targetNode, view) => {
   // observer.disconnect();
 };
 
-const renderAddPostButton = postCommonParent => {
+const renderAddPostButton = (postCommonParent, view) => {
   if (!postCommonParent) return;
-  let top, middle, bottom; // header, body, footer
+  let top;
   let childrenArray = Array.from(postCommonParent.childNodes).filter(node =>
     node.hasChildNodes()
   );
   top = childrenArray[0];
-  middle = childrenArray[1];
-  bottom = childrenArray[2];
   let linkToOpenPostInOwnPage = top.querySelector(
     SELECTOR_TO_ADDPOST_BTN_SIBLING // the addpost button will be rendered beside this element (on the left).
   );
   const btnEl = document.createElement("span");
   const textNode = document.createTextNode("ADD THIS POST");
   Object.assign(btnEl.style, addPostBtnStyle);
+  btnEl.setAttribute("view", view);
   // btnEl.classList.add("btnEl"); somehow cannot detect the class from content-css.css
   btnEl.appendChild(textNode);
   btnEl.onclick = event => {
@@ -289,12 +304,10 @@ const initFacebookApp = () => {
     setupMutationObserver(postsContainer.el, postsContainer.view);
     // can find other ways to check which facebook view is it? can make the code more reusable if can find a way to check and pass in as params to this function.
     if (postsContainer.view === whichFacebookViewEnum.NEWSFEED) {
-      posts = newsFeed.querySelectorAll('[data-pagelet^="FeedUnit"]');
+      posts = newsFeed.querySelectorAll(SELECTOR_TO_NEWSFEED_POST);
     }
     if (postsContainer.view === whichFacebookViewEnum.PAGE) {
-      posts = pageFeed.querySelectorAll(
-        "div.k4urcfbm > div.du4w35lb.k4urcfbm.l9j0dhe7.sjgh65i0"
-      );
+      posts = pageFeed.querySelectorAll(SELECTOR_TO_PAGEFEED_POST);
       // posts = pageFeed.querySelectorAll("div.lzcic4wl[role='article']"); // can do this also but make it same as the detected childNodes in mutation observer to make it more standardized.
     }
     if (!posts) {
@@ -313,7 +326,10 @@ const initFacebookApp = () => {
       }
       console.log(i);
       let post = posts[i];
-      renderAddPostButton(post.querySelector(SELECTOR_TO_POST_COMMON_PARENT));
+      renderAddPostButton(
+        post.querySelector(SELECTOR_TO_POST_COMMON_PARENT),
+        postsContainer.view
+      );
     }
   }
 };
