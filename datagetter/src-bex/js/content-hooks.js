@@ -49,11 +49,14 @@ const SELECTOR_TO_COMMENTS_SECTION =
   "div.stjgntxs.ni8dbmo4.l82x9zwi.uo3d90p7.h905i5nu.monazrh9 > div > div.cwj9ozl2.tvmbv18p > ul";
 const SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT =
   "div.b3i9ofy5.e72ty7fz.qlfml3jp.inkptoze.qmr60zad.rq0escxv.oo9gr5id.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.d2edcug0.jm1wdb64.l9j0dhe7.l3itjdph.qv66sw1b > div.tw6a2znq.sj5x9vvc.d1544ag0.cxgpxx05";
+// g5ia77u1 replaces b3i9ofy5 if the comment is empty
 const SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT2 =
   "div > div.l9j0dhe7.ecm0bbzt.rz4wbd8a.qt6c0cv9.dati1w0a.j83agx80.btwxx1t3.lzcic4wl[role='article'] > div.rj1gh0hx.buofh1pr.ni8dbmo4.stjgntxs.hv4rvrfc > div > div.q9uorilb.bvz0fpym.c1et5uql.sf5mxxl7 > div > div > div.b3i9ofy5.e72ty7fz.qlfml3jp.inkptoze.qmr60zad.rq0escxv.oo9gr5id.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.d2edcug0.jm1wdb64.l9j0dhe7.l3itjdph.qv66sw1b > div.tw6a2znq.sj5x9vvc.d1544ag0.cxgpxx05";
-const SELECTOR_TO_COMMENT_COMMENTOR =
+const SELECTOR_TO_COMMENT_COMMENTOR = "span.nc684nl6";
+const SELECTOR_TO_COMMENT_SAID = "div.ecm0bbzt.e5nlhep0.a8c37x1j";
+const SELECTOR_TO_COMMENT_COMMENTOR2 =
   "span.pq6dq46d > span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.lrazzd5p.oo9gr5id[dir='auto']";
-const SELECTOR_TO_COMMENT_SAID =
+const SELECTOR_TO_COMMENT_SAID2 =
   "div.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.c1et5uql > div[dir='auto']";
 const SELECTOR_TO_POST_BODY_OWN_CONTENT_EXT_LINK = "a[role='link']";
 const SELECTOR_TO_POST_BODY_OWN_CONTENT_VIDEO = "div[aria-label='Play video']";
@@ -210,10 +213,10 @@ const getAllReplies = listOfReplies => {
       );
       console.log(individualCommentCommonParent);
       if (individualCommentCommonParent) {
-        const commentor = individualCommentCommonParent.children[0].querySelector(
+        const commentor = individualCommentCommonParent.querySelector(
           SELECTOR_TO_COMMENT_COMMENTOR
         ).textContent;
-        const said = individualCommentCommonParent.children[1].querySelector(
+        const said = individualCommentCommonParent.querySelector(
           SELECTOR_TO_COMMENT_SAID
         ).textContent;
         console.log("commentor: " + commentor);
@@ -296,7 +299,7 @@ const getPostData = event => {
       console.log("cant find commentsSection.");
     }
   } else {
-    console.log("cant find common parent.");
+    console.log("cant find postCommonParent.");
   }
   sendPostToCrx(author, postBody, comments);
 };
