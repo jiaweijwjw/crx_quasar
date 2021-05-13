@@ -35,6 +35,10 @@
     onclick: onClickAddChunk
   });
 
+  // chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+  //   console.log(changeInfo.url);
+  // });
+
   // function onClickAddPostData(info) {
   //   console.log("onclickaddpostdata");
   //   console.log(info);

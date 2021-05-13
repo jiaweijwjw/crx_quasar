@@ -5,10 +5,6 @@ const util = require("util"); // for logging purposes only
 let drawerStatusToggle = null;
 let appStatusToggle = null;
 
-const SELECTOR_TO_POST_COMMON_PARENT =
-  "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div";
-const SELECTOR_TO_ADDPOST_BTN_SIBLING =
-  "span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.knj5qynh.m9osqain.hzawbc8m[dir='auto'] > span[id^='jsc']";
 const CLASSES_IF_IS_POST_ON_PAGE = [
   "du4w35lb",
   "k4urcfbm",
@@ -36,6 +32,10 @@ const CLASSES_IF_IS_OTHER_FB_POST_BODY_PART = [
   "tvfksri0",
   "ozuftl9m"
 ];
+const SELECTOR_TO_POST_COMMON_PARENT =
+  "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div";
+const SELECTOR_TO_ADDPOST_BTN_SIBLING =
+  "span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.knj5qynh.m9osqain.hzawbc8m[dir='auto'] > span[id^='jsc']";
 const CLASS_IF_IS_OWN_CONTENT_BODY_PART = "l9j0dhe7";
 const SELECTOR_TO_NEWSFEED = "[role='feed']";
 const SELECTOR_TO_PAGEFEED =
@@ -58,6 +58,9 @@ const SELECTOR_TO_COMMENT_SAID =
 const SELECTOR_TO_POST_BODY_OWN_CONTENT_EXT_LINK = "a[role='link']";
 const SELECTOR_TO_POST_BODY_OWN_CONTENT_VIDEO = "div[aria-label='Play video']";
 const SELECTOR_TO_POST_BODY_OTHER_FB_POST_LINK = "a[role='link']";
+const SELECTOR_TO_GETALLREPLIES_MORE_REPLIES =
+  "ul:not(._6coi.oygrvhab.ozuftl9m.l66bhrea.linoseic)";
+
 const addPostBtnStyle = {
   color: "#d33682",
   backgroundColor: "#002b36",
@@ -206,9 +209,6 @@ const getAllReplies = listOfReplies => {
         SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT
       );
       console.log(individualCommentCommonParent);
-      const moreReplies = listOfReplies[i].children[1].querySelector("ul");
-      console.log(moreReplies);
-
       if (individualCommentCommonParent) {
         const commentor = individualCommentCommonParent.children[0].querySelector(
           SELECTOR_TO_COMMENT_COMMENTOR
@@ -220,8 +220,15 @@ const getAllReplies = listOfReplies => {
         console.log("said: " + said);
         comment["commentor"] = commentor;
         comment["said"] = said;
+      } else {
+        console.log("cant find individualCommentCommonParent");
+        continue; // if dont skip this iteration, if unable to handle comment, will screw up the whole comments part. At least still can get the other comments but just skip this one buggy comment.
       }
 
+      const moreReplies = listOfReplies[i].querySelector(
+        SELECTOR_TO_GETALLREPLIES_MORE_REPLIES
+      );
+      console.log(moreReplies);
       if (!moreReplies) {
         replies.push(comment);
       } else {
@@ -236,7 +243,6 @@ const getAllReplies = listOfReplies => {
 const getPostData = event => {
   let top, middle, bottom;
   let author = "";
-  let originalPostText = "assign a fixed string for now.";
   let comments = [];
   let postBody = {
     text: null,
@@ -283,10 +289,11 @@ const getPostData = event => {
     console.log(postBody);
     const commentsSection = bottom.querySelector(SELECTOR_TO_COMMENTS_SECTION);
     console.log(commentsSection); // an unordered list
-    console.log(comments);
     if (commentsSection) {
       comments = getAllReplies(commentsSection.children);
       console.log(comments);
+    } else {
+      console.log("cant find commentsSection.");
     }
   } else {
     console.log("cant find common parent.");

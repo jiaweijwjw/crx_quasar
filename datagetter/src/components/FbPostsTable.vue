@@ -38,14 +38,18 @@ export default {
           align: "left",
           field: row => row.author,
           format: val => `${val}`,
-          sortable: true
+          sortable: true,
+          style: "max-width: 20%",
+          classes: "ellipsis"
         },
         {
           name: "postText",
           align: "left",
           label: "Post Text",
           field: row => row.postBody.text,
-          sortable: true
+          sortable: true,
+          style: "max-width: 80%",
+          classes: "ellipsis"
         }
       ]
     };
