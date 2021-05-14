@@ -36,7 +36,8 @@ const SELECTOR_TO_PAGEFEED =
 const SELECTOR_TO_NEWSFEED_POST = "[data-pagelet^='FeedUnit']";
 const SELECTOR_TO_PAGEFEED_POST =
   "div.k4urcfbm > div.du4w35lb.k4urcfbm.l9j0dhe7.sjgh65i0";
-const SELECTOR_TO_POST_AUTHOR = "[id^='jsc'] > span.nc684nl6 > a[role='link']";
+const SELECTOR_TO_POST_AUTHOR =
+  "[id^='jsc'].gmql0nx0.l94mrbxd.p1ri9a11.lzcic4wl.aahdfvyu.hzawbc8m > span.nc684nl6 > a[role='link']";
 const SELECTOR_TO_COMMENTS_SECTION =
   "div.stjgntxs.ni8dbmo4.l82x9zwi.uo3d90p7.h905i5nu.monazrh9 > div > div.cwj9ozl2.tvmbv18p > ul";
 const SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT2 =
@@ -52,6 +53,8 @@ const SELECTOR_TO_COMMENT_ATTACHED_EXT_LINK = "a[role='link']";
 const SELECTOR_TO_POST_BODY_OWN_CONTENT_EXT_LINK = "a[role='link']";
 const SELECTOR_TO_POST_BODY_OWN_CONTENT_VIDEO = "div[aria-label='Play video']";
 const SELECTOR_TO_POST_BODY_OTHER_FB_POST_LINK = "a[role='link']";
+const SELECTOR_TO_POST_BODY_BLOCK_QUOTE =
+  "div.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.c1et5uql.ii04i59q";
 const SELECTOR_TO_GETALLREPLIES_MORE_REPLIES =
   "ul:not(._6coi.oygrvhab.ozuftl9m.l66bhrea.linoseic)";
 
@@ -72,7 +75,8 @@ const whichFacebookViewEnum = Object.freeze({
 });
 const postBodyPartEnum = Object.freeze({
   TEXT: 1,
-  OTHER_FB_POST: 2,
-  OWN_CONTENT: 3,
-  UNKNOWN: 4
+  BLOCKQUOTE: 2,
+  OTHER_FB_POST: 3,
+  OWN_CONTENT: 4,
+  UNKNOWN: 5
 });

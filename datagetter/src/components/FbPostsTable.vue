@@ -46,7 +46,7 @@ export default {
           name: "postText",
           align: "left",
           label: "Post Text",
-          field: row => row.postBody.text,
+          field: row => row.postBody.text || row.postBody.blockQuote,
           sortable: true,
           style: "max-width: 80%",
           classes: "ellipsis"

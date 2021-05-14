@@ -63,6 +63,8 @@ const isWhichBodyPart = childOfMiddle => {
     const id = childOfMiddle.getAttribute("id");
     const classesInNode = childOfMiddle.classList;
     const dir = childOfMiddle.getAttribute("dir");
+    const tagName = childOfMiddle.tagName;
+    console.log(tagName);
     if (classesInNode.length === 0 && dir === "auto") {
       return postBodyPartEnum.TEXT;
     } else if (id && classesInNode.length === 1) {
@@ -87,6 +89,8 @@ const isWhichBodyPart = childOfMiddle => {
         }
       }
       return postBodyPartEnum.UNKNOWN;
+    } else if (tagName === "BLOCKQUOTE") {
+      return postBodyPartEnum.BLOCKQUOTE;
     } else {
       return postBodyPartEnum.UNKNOWN;
     }
@@ -95,6 +99,11 @@ const isWhichBodyPart = childOfMiddle => {
 
 const digestBodyText = textChild => {
   return textChild.textContent;
+};
+
+const digestBodyBlockQuote = blockQuoteChild => {
+  return blockQuoteChild.querySelector(SELECTOR_TO_POST_BODY_BLOCK_QUOTE)
+    .textContent;
 };
 
 const digestBodyOtherFbPost = otherFbPostChild => {
@@ -152,17 +161,14 @@ const getAllReplies = listOfReplies => {
           const ext_link = attachedToCommentNode.querySelector(
             SELECTOR_TO_COMMENT_ATTACHED_EXT_LINK
           );
-          console.log(img);
-          console.log(ext_link);
           if (img) {
             said["attached"] = img.getAttribute("src");
           }
           if (ext_link) {
-            said["attached"] = video.getAttribute("href");
+            said["attached"] = ext_link.getAttribute("href");
           }
           // what if got multiple sial
         }
-        console.log(said);
         commentor.name =
           commentorNode.textContent || `unable to get commentor's name`;
         commentor.fbLink = commentorNode.getAttribute("href");
@@ -196,39 +202,40 @@ const getPostData = event => {
   let top, middle, bottom;
   let author = { name: "", fbLink: "" };
   let comments = [];
-  let postBody = {
-    text: null,
-    otherFbPost: null,
-    ownContent: null
-  };
+  let postBody = {};
   // const view = parseInt(event.target.getAttribute("view")); // unused for now
   const postCommonParent = event.target.closest(SELECTOR_TO_POST_COMMON_PARENT);
   console.log(postCommonParent);
   if (postCommonParent) {
-    const childrenArray = Array.from(postCommonParent.childNodes).filter(node =>
-      node.hasChildNodes()
+    const childrenArray = Array.from(postCommonParent.childNodes).filter(
+      node => node.hasChildNodes() && node.classList.length === 0 // filterning classList.length === 0 is to remove advertisements.
     ); // childrenArray consists of the header (top), body (middle) and footer (bottom) of a post.
-    console.log(childrenArray);
     top = childrenArray[0];
     middle = childrenArray[1];
     bottom = childrenArray[2];
     const authorNode = top.querySelector(SELECTOR_TO_POST_AUTHOR);
-    author.name = authorNode.textContent || `unable to get author's name`;
-    author.fbLink = authorNode.getAttribute("href");
+    if (authorNode) {
+      author.name = authorNode.textContent || `unable to get author's name`;
+      author.fbLink = authorNode.getAttribute("href");
+    }
     for (let p = 0; p < middle.children.length; p++) {
       const bodyPart = isWhichBodyPart(middle.children[p]);
       switch (bodyPart) {
         case postBodyPartEnum.TEXT:
           console.log("text");
-          postBody.text = digestBodyText(middle.children[p]);
+          postBody["text"] = digestBodyText(middle.children[p]);
+          break;
+        case postBodyPartEnum.BLOCKQUOTE:
+          console.log("blockquote");
+          postBody["blockQuote"] = digestBodyBlockQuote(middle.children[p]);
           break;
         case postBodyPartEnum.OTHER_FB_POST:
           console.log("other fb post");
-          postBody.otherFbPost = digestBodyOtherFbPost(middle.children[p]);
+          postBody["otherFbPost"] = digestBodyOtherFbPost(middle.children[p]);
           break;
         case postBodyPartEnum.OWN_CONTENT:
           console.log("own content");
-          postBody.ownContent = digestBodyOwnContent(middle.children[p]);
+          postBody["ownContent"] = digestBodyOwnContent(middle.children[p]);
           break;
         case postBodyPartEnum.UNKNOWN:
           console.log("unknown body part");
@@ -242,7 +249,6 @@ const getPostData = event => {
     console.log(commentsSection); // an unordered list
     if (commentsSection) {
       comments = getAllReplies(commentsSection.children);
-      console.log(comments);
     } else {
       console.log("cant find commentsSection.");
     }
