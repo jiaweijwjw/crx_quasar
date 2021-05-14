@@ -36,7 +36,7 @@ export default {
           required: true,
           label: "Author",
           align: "left",
-          field: row => row.author,
+          field: row => row.author.name,
           format: val => `${val}`,
           sortable: true,
           style: "max-width: 20%",

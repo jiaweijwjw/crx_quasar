@@ -5,87 +5,6 @@ const util = require("util"); // for logging purposes only
 let drawerStatusToggle = null;
 let appStatusToggle = null;
 
-const CLASSES_IF_IS_POST_ON_PAGE = [
-  "du4w35lb",
-  "k4urcfbm",
-  "l9j0dhe7",
-  "sjgh65i0"
-];
-const CLASSES_IF_IS_OTHER_FB_POST_BODY_PART = [
-  "cwj9ozl2",
-  "qbxu24ho",
-  "bxzzcbxg",
-  "lxuwth05",
-  "h2mp5456",
-  "ue3kfks5",
-  "pw54ja7n",
-  "uo3d90p7",
-  "l82x9zwi",
-  "goun2846",
-  "ccm00jje",
-  "s44p3ltw",
-  "mk2mc5f4",
-  "frvqaej8",
-  "ed0hlay0",
-  "afxsp9o4",
-  "jcgfde61",
-  "tvfksri0",
-  "ozuftl9m"
-];
-const SELECTOR_TO_POST_COMMON_PARENT =
-  "div.lzcic4wl[role='article'] > div.j83agx80.cbu4d94t > div.rq0escxv.l9j0dhe7.du4w35lb > div.j83agx80.l9j0dhe7.k4urcfbm > div.rq0escxv.l9j0dhe7.du4w35lb.hybvsw6c.io0zqebd.m5lcvass.fbipl8qg.nwvqtn77.k4urcfbm.ni8dbmo4.stjgntxs.sbcfpzgs > div > div:not(:empty) > div";
-const SELECTOR_TO_ADDPOST_BTN_SIBLING =
-  "span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.knj5qynh.m9osqain.hzawbc8m[dir='auto'] > span[id^='jsc']";
-const CLASS_IF_IS_OWN_CONTENT_BODY_PART = "l9j0dhe7";
-const SELECTOR_TO_NEWSFEED = "[role='feed']";
-const SELECTOR_TO_PAGEFEED =
-  "div.dp1hu0rb.d2edcug0.taijpn5t.j83agx80.gs1a9yip > div.k4urcfbm.dp1hu0rb.d2edcug0.cbu4d94t.j83agx80.bp9cbjyn[role='main'] > div.k4urcfbm";
-const SELECTOR_TO_NEWSFEED_POST = "[data-pagelet^='FeedUnit']";
-const SELECTOR_TO_PAGEFEED_POST =
-  "div.k4urcfbm > div.du4w35lb.k4urcfbm.l9j0dhe7.sjgh65i0";
-const SELECTOR_TO_POST_AUTHOR =
-  ".gmql0nx0.l94mrbxd.p1ri9a11.lzcic4wl.aahdfvyu.hzawbc8m[id^='jsc'][dir='auto']";
-const SELECTOR_TO_COMMENTS_SECTION =
-  "div.stjgntxs.ni8dbmo4.l82x9zwi.uo3d90p7.h905i5nu.monazrh9 > div > div.cwj9ozl2.tvmbv18p > ul";
-const SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT =
-  "div.b3i9ofy5.e72ty7fz.qlfml3jp.inkptoze.qmr60zad.rq0escxv.oo9gr5id.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.d2edcug0.jm1wdb64.l9j0dhe7.l3itjdph.qv66sw1b > div.tw6a2znq.sj5x9vvc.d1544ag0.cxgpxx05";
-// g5ia77u1 replaces b3i9ofy5 if the comment is empty
-const SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT2 =
-  "div > div.l9j0dhe7.ecm0bbzt.rz4wbd8a.qt6c0cv9.dati1w0a.j83agx80.btwxx1t3.lzcic4wl[role='article'] > div.rj1gh0hx.buofh1pr.ni8dbmo4.stjgntxs.hv4rvrfc > div > div.q9uorilb.bvz0fpym.c1et5uql.sf5mxxl7 > div > div > div.b3i9ofy5.e72ty7fz.qlfml3jp.inkptoze.qmr60zad.rq0escxv.oo9gr5id.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.d2edcug0.jm1wdb64.l9j0dhe7.l3itjdph.qv66sw1b > div.tw6a2znq.sj5x9vvc.d1544ag0.cxgpxx05";
-const SELECTOR_TO_COMMENT_COMMENTOR = "span.nc684nl6";
-const SELECTOR_TO_COMMENT_SAID = "div.ecm0bbzt.e5nlhep0.a8c37x1j";
-const SELECTOR_TO_COMMENT_COMMENTOR2 =
-  "span.pq6dq46d > span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.oi732d6d.ik7dh3pa.ht8s03o8.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d9wwppkn.fe6kdd0r.mau55g9w.c8b282yb.mdeji52x.e9vueds3.j5wam9gi.lrazzd5p.oo9gr5id[dir='auto']";
-const SELECTOR_TO_COMMENT_SAID2 =
-  "div.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.c1et5uql > div[dir='auto']";
-const SELECTOR_TO_POST_BODY_OWN_CONTENT_EXT_LINK = "a[role='link']";
-const SELECTOR_TO_POST_BODY_OWN_CONTENT_VIDEO = "div[aria-label='Play video']";
-const SELECTOR_TO_POST_BODY_OTHER_FB_POST_LINK = "a[role='link']";
-const SELECTOR_TO_GETALLREPLIES_MORE_REPLIES =
-  "ul:not(._6coi.oygrvhab.ozuftl9m.l66bhrea.linoseic)";
-
-const addPostBtnStyle = {
-  color: "#d33682",
-  backgroundColor: "#002b36",
-  border: "medium ridge #073642",
-  fontSize: "small",
-  boxShadow: "1px 1px 2px 0px #000",
-  cursor: "pointer",
-  margin: "0 3px 0 0",
-  padding: "0 3px 0 3px",
-  textAlign: "centre"
-};
-const whichFacebookViewEnum = Object.freeze({
-  NEWSFEED: 1,
-  PAGE: 2
-});
-const postBodyPartEnum = Object.freeze({
-  TEXT: 1,
-  OTHER_FB_POST: 2,
-  OWN_CONTENT: 3,
-  UNKNOWN: 4
-});
-
 const iFrame = document.createElement("iframe");
 iFrame.id = "datagetter-iframe";
 iFrame.name = ""; // name attribute is to differentiate between the drawer state.
@@ -208,19 +127,49 @@ const getAllReplies = listOfReplies => {
     // length !== 0
     for (let i = 0; i < listOfReplies.length; i++) {
       let comment = {};
+      let commentor = { name: "", fbLink: "" };
+      let said = {};
+      let reactions = {};
       const individualCommentCommonParent = listOfReplies[i].querySelector(
         SELECTOR_TO_INDIVIDUAL_COMMENT_COMMON_PARENT
       );
       console.log(individualCommentCommonParent);
       if (individualCommentCommonParent) {
-        const commentor = individualCommentCommonParent.querySelector(
+        const commentorNode = individualCommentCommonParent.querySelector(
           SELECTOR_TO_COMMENT_COMMENTOR
-        ).textContent;
-        const said = individualCommentCommonParent.querySelector(
+        );
+        const saidNode = individualCommentCommonParent.querySelector(
           SELECTOR_TO_COMMENT_SAID
-        ).textContent;
-        console.log("commentor: " + commentor);
-        console.log("said: " + said);
+        );
+        const attachedToCommentNode = listOfReplies[i].querySelector(
+          SELECTOR_TO_COMMENT_ATTACHED
+        );
+        console.log(attachedToCommentNode);
+        if (attachedToCommentNode) {
+          const img = attachedToCommentNode.querySelector(
+            SELECTOR_TO_COMMENT_ATTACHED_IMG
+          );
+          const ext_link = attachedToCommentNode.querySelector(
+            SELECTOR_TO_COMMENT_ATTACHED_EXT_LINK
+          );
+          console.log(img);
+          console.log(ext_link);
+          if (img) {
+            said["attached"] = img.getAttribute("src");
+          }
+          if (ext_link) {
+            said["attached"] = video.getAttribute("href");
+          }
+          // what if got multiple sial
+        }
+        console.log(said);
+        commentor.name =
+          commentorNode.textContent || `unable to get commentor's name`;
+        commentor.fbLink = commentorNode.getAttribute("href");
+        if (saidNode) {
+          said["text"] = saidNode.textContent;
+        }
+        console.log("commentor: " + commentor.name);
         comment["commentor"] = commentor;
         comment["said"] = said;
       } else {
@@ -245,7 +194,7 @@ const getAllReplies = listOfReplies => {
 
 const getPostData = event => {
   let top, middle, bottom;
-  let author = "";
+  let author = { name: "", fbLink: "" };
   let comments = [];
   let postBody = {
     text: null,
@@ -263,10 +212,9 @@ const getPostData = event => {
     top = childrenArray[0];
     middle = childrenArray[1];
     bottom = childrenArray[2];
-    author =
-      top.querySelector(SELECTOR_TO_POST_AUTHOR).querySelector("span")
-        .textContent || `unable to get author's name`;
-
+    const authorNode = top.querySelector(SELECTOR_TO_POST_AUTHOR);
+    author.name = authorNode.textContent || `unable to get author's name`;
+    author.fbLink = authorNode.getAttribute("href");
     for (let p = 0; p < middle.children.length; p++) {
       const bodyPart = isWhichBodyPart(middle.children[p]);
       switch (bodyPart) {
