@@ -105,10 +105,6 @@ export default {
     ]),
     toggleDrawer() {
       this.drawerStatusToggle = !this.drawerStatusToggle;
-      // WHAT IS THIS FOR???
-      this.$q.bex.send("toggle.drawer", {
-        showDrawer: this.drawerStatusToggle
-      });
     },
     toggleSideDrawer() {
       this.sideDrawer = !this.sideDrawer;

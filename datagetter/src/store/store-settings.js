@@ -37,6 +37,9 @@ const actions = {
   setDrawerStatusToggle({ commit }, drawerStatusToggle) {
     Storage.save("drawerStatusToggle", drawerStatusToggle).then(res => {
       commit("setDrawerStatusToggle", res);
+      this._vm.$q.bex.send("toggle.drawer", {
+        showDrawer: res
+      });
     });
   },
   setSideDrawer({ commit }, sideDrawer) {

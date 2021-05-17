@@ -3,32 +3,40 @@
     <q-btn
       dense
       label="download selected as json"
-      @click="save('selected', 'json')"
+      @click="save(tableActionOptions.SELECTED, tableActionOptions.JSON)"
       color="cyan"
     />
     <q-btn
       dense
       label="download all as json"
-      @click="save('all', 'json')"
+      @click="save(tableActionOptions.ALL, tableActionOptions.JSON)"
       color="cyan"
     />
     <q-btn
       dense
       label="delete selected"
-      @click="remove('selected')"
+      @click="remove(tableActionOptions.SELECTED)"
       color="yellow"
     />
-    <q-btn dense label="delete all" @click="remove('all')" color="yellow" />
+    <q-btn
+      dense
+      label="delete all"
+      @click="remove(tableActionOptions.ALL)"
+      color="yellow"
+    />
   </div>
 </template>
 
 <script>
 import { saveAs } from "file-saver";
 import { mapGetters, mapActions } from "vuex";
+import { tableActionOptions } from "../services/enums";
 export default {
   name: "FbPostsTableActions",
   data() {
-    return {};
+    return {
+      tableActionOptions
+    };
   },
   methods: {
     ...mapActions("fbpoststore", ["deletePosts", "deleteAllPosts"]),
@@ -36,17 +44,17 @@ export default {
       let collated = [];
       let options = {};
       let fileName = "";
-      if (fileType === "json") {
+      if (fileType === this.tableActionOptions.JSON) {
         // saved as a JSONArray
         options = { type: "application/json" };
         fileName = "default.json";
-        if (saveType === "all") {
+        if (saveType === this.tableActionOptions.SELECTED) {
+          collated = await this.collatePostsToJSON(this.getSelectedPosts);
+        }
+        if (saveType === this.tableActionOptions.ALL) {
           collated = await this.collatePostsToJSON(
             Object.values(this.getPosts)
           );
-        }
-        if (saveType === "selected") {
-          collated = await this.collatePostsToJSON(this.getSelectedPosts);
         }
       }
       let blob = new Blob([collated], options);
@@ -61,10 +69,10 @@ export default {
       return JSON.stringify(collated);
     },
     remove(removeType) {
-      if (removeType === "selected") {
+      if (removeType === this.tableActionOptions.SELECTED) {
         this.deletePosts(this.getSelectedPosts.map(post => post.id));
       }
-      if (removeType === "all") {
+      if (removeType === this.tableActionOptions.ALL) {
         this.deleteAllPosts();
       }
     }
