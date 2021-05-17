@@ -16,8 +16,8 @@
         color="background2"
         text-color="textColor2"
         unelevated
-        to="/addchunk"
-        label="Go to addchunk page"
+        to="/"
+        label="Go to home page"
         no-caps
       />
     </div>

@@ -6,12 +6,13 @@ import AddFbPostPage from "src/pages/AddFbPostPage.vue";
 import PopupPage from "pages/PopupPage.vue";
 import Error404 from "pages/Error404.vue";
 
+const DEFAULT_ROUTE = "AddChunkPage";
 const routes = [
   {
     path: "/",
     component: BrowserLayout,
     children: [
-      { path: "/", redirect: "/addchunk" },
+      { path: "/", redirect: { name: DEFAULT_ROUTE } },
       { name: "AddChunkPage", path: "/addchunk", component: AddChunkPage },
       { name: "AddFbPostPage", path: "/addpost", component: AddFbPostPage }
     ]
@@ -30,3 +31,4 @@ const routes = [
 ];
 
 export default routes;
+export { DEFAULT_ROUTE };

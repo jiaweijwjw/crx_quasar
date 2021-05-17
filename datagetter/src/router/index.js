@@ -1,9 +1,9 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import Vue from "vue";
+import VueRouter from "vue-router";
 
-import routes from './routes'
+import routes from "./routes";
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
 
 /*
  * If not building with SSR mode, you can
@@ -13,10 +13,13 @@ Vue.use(VueRouter)
  * async/await or return a Promise which resolves
  * with the Router instance.
  */
-
-export default function (/* { store, ssrContext } */) {
-  const Router = new VueRouter({
-    scrollBehavior: () => ({ x: 0, y: 0 }),
+let router = null;
+export default function(/* { store, ssrContext } */) {
+  router = new VueRouter({
+    scrollBehavior: () => ({
+      x: 0,
+      y: 0
+    }),
     routes,
 
     // Leave these as they are and change in quasar.conf.js instead!
@@ -24,7 +27,9 @@ export default function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> publicPath
     mode: process.env.VUE_ROUTER_MODE,
     base: process.env.VUE_ROUTER_BASE
-  })
+  });
 
-  return Router
+  return router; // to be able to import and use in any js files
 }
+
+export { router };

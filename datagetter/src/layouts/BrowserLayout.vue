@@ -18,6 +18,7 @@
               clickable
               :to="{ name: menuItem.route }"
               v-ripple
+              @click="toggleSideDrawer"
             >
               <q-item-section avatar>
                 <q-icon :name="menuItem.icon" />

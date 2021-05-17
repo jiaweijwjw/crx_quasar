@@ -31,6 +31,7 @@
 import { saveAs } from "file-saver";
 import { mapGetters, mapActions } from "vuex";
 import { tableActionOptions } from "../services/enums";
+import save from "../services/save.to.file";
 export default {
   name: "FbPostsTableActions",
   data() {

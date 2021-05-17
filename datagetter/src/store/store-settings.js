@@ -1,4 +1,6 @@
 import Storage from "../services/storage.access";
+import { router } from "../router/index";
+import { DEFAULT_ROUTE } from "../router/routes";
 
 const defaultState = () => {
   return {
@@ -48,6 +50,11 @@ const actions = {
   async initCrxBrowser({ commit }) {
     Storage.get("drawerStatusToggle").then(res => {
       commit("setDrawerStatusToggle", res);
+    });
+    Storage.get("crxBrowserPageView").then(res => {
+      if (res !== DEFAULT_ROUTE) {
+        router.push({ name: res });
+      }
     });
   },
   async initCrxPopup({ commit }) {

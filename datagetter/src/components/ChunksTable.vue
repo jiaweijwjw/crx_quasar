@@ -64,17 +64,6 @@ export default {
       }
     }
   },
-  watch: {
-    selected: function(newSelection, oldSelection) {
-      if (newSelection.length === 0) {
-        console.log("clear selection");
-        console.log(this.selected);
-      } else if (newSelection.length > 0) {
-        console.log("emit new selections");
-        console.log(this.selected);
-      }
-    }
-  },
   methods: {
     ...mapActions("chunkstore", ["setSelectedChunks"]),
     getSelectedString() {

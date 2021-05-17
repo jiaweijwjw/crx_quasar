@@ -12,6 +12,7 @@
 <script>
 import FbPostsTable from "components/FbPostsTable.vue";
 import FbPostsTableActions from "src/components/FbPostsTableActions.vue";
+import Storage from "../services/storage.access";
 export default {
   name: "AddFbPostPage",
   props: ["drawerStatusToggle"],
@@ -21,6 +22,9 @@ export default {
   },
   data() {
     return {};
+  },
+  created() {
+    Storage.save("crxBrowserPageView", this.$route.name);
   }
 };
 </script>

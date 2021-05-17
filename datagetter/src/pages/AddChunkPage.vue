@@ -12,7 +12,7 @@
 <script>
 import ChunksTable from "src/components/ChunksTable.vue";
 import ChunksTableActions from "src/components/ChunksTableActions.vue";
-
+import Storage from "../services/storage.access";
 export default {
   name: "AddChunkPage",
   props: ["drawerStatusToggle"],
@@ -22,9 +22,11 @@ export default {
   },
   data() {
     return {};
+  },
+  created() {
+    Storage.save("crxBrowserPageView", this.$route.name);
   }
 };
-// q-page    // :class="drawerStatusToggle ? 'q-page-shown' : 'q-page-hidden'"
 </script>
 <style lang="sass" scoped>
 .q-page

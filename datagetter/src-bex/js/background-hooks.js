@@ -33,6 +33,7 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
       delete items.chunks;
       delete items.appStatusToggle;
       delete items.drawerStatusToggle;
+      delete items.crxBrowserPageView;
       for (const itemKey in items) {
         results.push(items[itemKey]); // value = obj[key]
       }
