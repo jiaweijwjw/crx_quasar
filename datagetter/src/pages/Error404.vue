@@ -1,5 +1,7 @@
 <template>
-  <div class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center">
+  <div
+    class="fullscreen bg-background text-textColor text-center q-pa-md flex flex-center"
+  >
     <div>
       <div style="font-size: 30vh">
         404
@@ -11,11 +13,11 @@
 
       <q-btn
         class="q-mt-xl"
-        color="white"
-        text-color="blue"
+        color="background2"
+        text-color="textColor2"
         unelevated
-        to="/"
-        label="Go Home"
+        to="/addchunk"
+        label="Go to addchunk page"
         no-caps
       />
     </div>
@@ -24,6 +26,6 @@
 
 <script>
 export default {
-  name: 'Error404'
-}
+  name: "Error404"
+};
 </script>

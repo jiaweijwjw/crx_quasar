@@ -11,7 +11,7 @@ const routes = [
     path: "/",
     component: BrowserLayout,
     children: [
-      { path: "/", redirect: "/addpost" },
+      { path: "/", redirect: "/addchunk" },
       { name: "AddChunkPage", path: "/addchunk", component: AddChunkPage },
       { name: "AddFbPostPage", path: "/addpost", component: AddFbPostPage }
     ]
