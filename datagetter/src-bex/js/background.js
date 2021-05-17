@@ -6,7 +6,6 @@
     console.log("Text selected: '" + text + "' from url: " + url);
     console.log("Number of characters selected: " + text.length);
     if (text.length !== 0) {
-      console.log("There was some text selected.");
       let parcel = {
         message: "new.chunk.added",
         content: {
@@ -19,9 +18,7 @@
           let chunkObj = results["chunks"] ? results["chunks"] : {}; // value = obj[key]
           let newChunk = { [res.id]: { id: res.id, text, url } }; // es6 computed property names
           Object.assign(chunkObj, newChunk);
-          chrome.storage.sync.set({ ["chunks"]: chunkObj }, function() {
-            console.log("id from quasar: " + res.id);
-          });
+          chrome.storage.sync.set({ ["chunks"]: chunkObj });
         });
       });
     } else {

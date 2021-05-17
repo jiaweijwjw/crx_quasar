@@ -19,12 +19,19 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["*://*.facebook.com/*"],
       "js": [
+        "js/constants-fb.js",
         "www/bex-content-script.js",
         "js/content-script.js",
-        "js/constants.js"
+        "js/content-script-fb.js"
       ],
+      "css": ["css/content-css.css"]
+    },
+    {
+      "matches": ["<all_urls>"],
+      "exclude_matches": ["*://*.facebook.com/*"],
+      "js": ["www/bex-content-script.js", "js/content-script.js"],
       "css": ["css/content-css.css"]
     }
   ],

@@ -1,3 +1,26 @@
+const addPostBtnStyle = {
+  color: "#d33682",
+  backgroundColor: "#002b36",
+  border: "medium ridge #073642",
+  fontSize: "small",
+  boxShadow: "1px 1px 2px 0px #000",
+  cursor: "pointer",
+  margin: "0 3px 0 0",
+  padding: "0 3px 0 3px",
+  textAlign: "centre"
+};
+const whichFacebookViewEnum = Object.freeze({
+  NEWSFEED: 1,
+  PAGE: 2
+});
+const postBodyPartEnum = Object.freeze({
+  TEXT: 1,
+  BLOCKQUOTE: 2,
+  OTHER_FB_POST: 3,
+  OWN_CONTENT: 4,
+  UNKNOWN: 5
+});
+
 const CLASSES_IF_IS_POST_ON_PAGE = [
   "du4w35lb",
   "k4urcfbm",
@@ -57,26 +80,3 @@ const SELECTOR_TO_POST_BODY_BLOCK_QUOTE =
   "div.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.c1et5uql.ii04i59q";
 const SELECTOR_TO_GETALLREPLIES_MORE_REPLIES =
   "ul:not(._6coi.oygrvhab.ozuftl9m.l66bhrea.linoseic)";
-
-const addPostBtnStyle = {
-  color: "#d33682",
-  backgroundColor: "#002b36",
-  border: "medium ridge #073642",
-  fontSize: "small",
-  boxShadow: "1px 1px 2px 0px #000",
-  cursor: "pointer",
-  margin: "0 3px 0 0",
-  padding: "0 3px 0 3px",
-  textAlign: "centre"
-};
-const whichFacebookViewEnum = Object.freeze({
-  NEWSFEED: 1,
-  PAGE: 2
-});
-const postBodyPartEnum = Object.freeze({
-  TEXT: 1,
-  BLOCKQUOTE: 2,
-  OTHER_FB_POST: 3,
-  OWN_CONTENT: 4,
-  UNKNOWN: 5
-});
