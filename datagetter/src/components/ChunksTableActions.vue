@@ -2,13 +2,13 @@
   <div>
     <q-btn
       dense
-      label="download selected"
+      label="download selected as txt"
       @click="save('selected', 'txt')"
       color="cyan"
     />
     <q-btn
       dense
-      label="download all"
+      label="download all as txt"
       @click="save('all', 'txt')"
       color="cyan"
     />

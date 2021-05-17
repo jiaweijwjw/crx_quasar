@@ -22,15 +22,6 @@ export default {
   },
   data() {
     return {};
-  },
-  methods: {},
-  async created() {
-    this.$q.bex.on("testdirect", event => {
-      const payload = event.data;
-      if (payload.msg === " hello") {
-        console.log("hello");
-      }
-    });
   }
 };
 // q-page    // :class="drawerStatusToggle ? 'q-page-shown' : 'q-page-hidden'"

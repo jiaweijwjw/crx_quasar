@@ -1,4 +1,3 @@
-const util = require("util");
 import Vue from "vue";
 import Storage from "../services/storage.access";
 
@@ -27,8 +26,6 @@ const state = defaultState();
 
 const mutations = {
   resetState(state) {
-    // Merge rather than replace so we don't lose observers
-    // https://github.com/vuejs/vuex/issues/1118
     Object.assign(state, defaultState());
   },
   setChunks(state, chunks) {
@@ -40,9 +37,6 @@ const mutations = {
   setSelectedChunks(state, selection) {
     state.selectedChunks = selection;
   },
-  // deleteAllChunks(state) {
-  //   Object.assign(state, updateChunks()); // have to do this to maintain reactivity
-  // },
   deleteChunks(state, chunksAfterDeletion) {
     Object.assign(state, updateChunks(chunksAfterDeletion));
   }
@@ -55,7 +49,6 @@ const actions = {
   initChunkData({ commit }) {
     Storage.get("chunks")
       .then(res => {
-        console.log(res);
         commit("setChunks", res);
       })
       .catch(() => {
@@ -74,9 +67,8 @@ const actions = {
     });
   },
   async deleteChunks({ commit, getters }, selection) {
-    // selection is an array of strings of the id of the selected chunks
     const removeProperties = async () => {
-      let cloneChunks = { ...getters["getChunks"] }; // cannot directly assign the getters["getChunks"]
+      let cloneChunks = { ...getters["getChunks"] };
       for (let i = 0; i < selection.length; i++) {
         delete cloneChunks[selection[i]];
       }

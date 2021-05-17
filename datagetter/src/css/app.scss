@@ -1,5 +1,6 @@
 // app global css in SCSS form
 
+// Main colors
 .text-cream {
   color: $cream;
 }
@@ -56,11 +57,26 @@
   background: $text-color2;
 }
 
-.text-cyan {
-  color: $cyan;
+// Other colors
+.text-yellow {
+  color: $yellow;
 }
-.bg-cyan {
-  background: $cyan;
+.bg-yellow {
+  background: $yellow;
+}
+
+.text-orange {
+  color: $orange;
+}
+.bg-orange {
+  background: $orange;
+}
+
+.text-red {
+  color: $red;
+}
+.bg-red {
+  background: $red;
 }
 
 .text-magenta {
@@ -68,4 +84,32 @@
 }
 .bg-magenta {
   background: $magenta;
+}
+
+.text-violet {
+  color: $violet;
+}
+.bg-violet {
+  background: $violet;
+}
+
+.text-blue {
+  color: $blue;
+}
+.bg-blue {
+  background: $blue;
+}
+
+.text-cyan {
+  color: $cyan;
+}
+.bg-cyan {
+  background: $cyan;
+}
+
+.text-green {
+  color: $green;
+}
+.bg-green {
+  background: $green;
 }

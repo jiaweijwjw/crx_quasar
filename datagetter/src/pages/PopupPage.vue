@@ -8,28 +8,19 @@
       toggle-color="background2"
       toggle-text-color="cream"
       :options="options"
-      @input="changeAppState"
     />
     <div v-if="appStatusToggle === true" class="page-item-container">
-      <q-btn label="testdirect" @click="testdirect" />
-      <q-btn label="testSetStorage" @click="testSetStorage('say', 'fuckkk')" />
-      <q-btn label="testGetStorage" @click="testGetStorage('say')" />
-      <q-btn label="testGetAll" @click="testGetAllStorage" />
-      <q-btn label="testDeleteStorage" @click="testDeleteStorage" />
+      <!-- Insert extension settings here -->
     </div>
   </q-page>
 </template>
 
 <script>
-import Storage from "../services/storage.access";
+import { mapGetters, mapActions } from "vuex";
 export default {
   name: "PopupPage",
-  // components: {
-  //   SelfSelect: require("components/manualget/SelfSelect.vue").default
-  // }
   data() {
     return {
-      appStatusToggle: null,
       options: [
         { label: "on", value: true },
         { label: "off", value: false }
@@ -37,41 +28,18 @@ export default {
     };
   },
   methods: {
-    changeAppState() {
-      Storage.save("appStatusToggle", this.appStatusToggle);
-    },
-    testdirect() {
-      this.$q.bex.send("testdirect", { msg: "hello" });
-    },
-    testSetStorage(someKey, someString) {
-      Storage.save(someKey, someString);
-    },
-    testGetStorage(someKey) {
-      Storage.get(someKey);
-    },
-    testGetAllStorage() {
-      Storage.getAll().then(res => {
-        console.log(res);
-      });
-    },
-    testDeleteStorage() {
-      Storage.delete("say");
-    },
-    async initialLoad() {
-      Storage.get("appStatusToggle").then(res => {
-        console.log("initialload, app is: " + res);
-        if (!res) {
-          // first time accessing the extension, appStatusToggle in storage will be undefined.
-          this.appStatusToggle = false;
-          Storage.save("appStatusToggle", false);
-        } else {
-          this.appStatusToggle = res;
-        }
-      });
-    }
+    ...mapActions("settingsstore", ["setAppStatusToggle"])
   },
-  async created() {
-    await this.initialLoad();
+  computed: {
+    ...mapGetters("settingsstore", ["getAppStatusToggle"]),
+    appStatusToggle: {
+      get: function() {
+        return this.getAppStatusToggle;
+      },
+      set: function(newStatus) {
+        this.setAppStatusToggle(newStatus);
+      }
+    }
   }
 };
 </script>

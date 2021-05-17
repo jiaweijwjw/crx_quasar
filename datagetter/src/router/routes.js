@@ -1,4 +1,4 @@
-// App is small, skip the lazy loading benefits as they could add more overhead than what it’s worth.
+// App is small, so skip the lazy loading benefits as they could add more overhead than what it’s worth.
 import BrowserLayout from "layouts/BrowserLayout.vue";
 import PopupLayout from "layouts/PopupLayout.vue";
 import AddChunkPage from "pages/AddChunkPage.vue";

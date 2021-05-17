@@ -1,4 +1,3 @@
-const util = require("util");
 import Vue from "vue";
 import Storage from "../services/storage.access";
 
@@ -26,9 +25,8 @@ const updatePosts = (newPosts = null) => {
 const state = defaultState();
 
 const mutations = {
+  // Use Vue.set or Object.assign when mutating object states to maintain reactivity
   resetState(state) {
-    // Merge rather than replace so we don't lose observers
-    // https://github.com/vuejs/vuex/issues/1118
     Object.assign(state, defaultState());
   },
   setPosts(state, posts) {
@@ -40,9 +38,6 @@ const mutations = {
   setSelectedPosts(state, selection) {
     state.selectedPosts = selection;
   },
-  // deleteAllPosts(state) {
-  //   Object.assign(state, updatePosts()); // have to do this to maintain reactivity
-  // },
   deletePosts(state, postsAfterDeletion) {
     Object.assign(state, updatePosts(postsAfterDeletion));
   }
@@ -55,13 +50,10 @@ const actions = {
   initPostData({ commit }) {
     Storage.getAllPosts()
       .then(res => {
-        console.log(res);
-        // let postsObj = Object.assign({}, res); // this will have keys starting from 0 instead of the post id.
         let postsObj = res.reduce(
           (objInArr, post) => ((objInArr[post.id] = post), objInArr),
           {}
         );
-        console.log(postsObj);
         commit("setPosts", postsObj);
       })
       .catch(() => {
@@ -91,7 +83,8 @@ const actions = {
     });
   },
   async deletePosts({ commit, getters }, selection) {
-    // selection is an array of strings of the id of the selected posts
+    // selection is an array of strings of id of the selected posts
+    // get the state posts object and remove the selected posts then set the state posts object with the new object after deletion.
     const removeProperties = async () => {
       let clonePosts = {
         ...getters["getPosts"]

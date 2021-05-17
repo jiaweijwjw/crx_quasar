@@ -12,18 +12,6 @@
       @click="save('all', 'json')"
       color="cyan"
     />
-    <!-- <q-btn
-      dense
-      label="download selected as csv"
-      @click="save('selected', 'csv')"
-      color="magenta"
-    />
-    <q-btn
-      dense
-      label="download all as csv"
-      @click="save('all', 'csv')"
-      color="magenta"
-    /> -->
     <q-btn
       dense
       label="delete selected"

@@ -1,5 +1,5 @@
 (function() {
-  // send the text and url to quasar then generate a uid there and send it back to store in the chrome.storage
+  // send the chunk to quasar then generate a uid there and send it back to store in the chrome.storage
   function onClickAddChunk(info) {
     const text = info.selectionText;
     const url = info.pageUrl;
@@ -34,28 +34,4 @@
     contexts: ["selection"],
     onclick: onClickAddChunk
   });
-
-  // chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-  //   console.log(changeInfo.url);
-  // });
-
-  // function onClickAddPostData(info) {
-  //   console.log("onclickaddpostdata");
-  //   console.log(info);
-  //   let parcel = {
-  //     message: "get.post.data"
-  //   };
-  //   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-  //     chrome.tabs.sendMessage(tabs[0].id, parcel, res => {
-  //       console.log(res);
-  //     });
-  //   });
-  // }
-
-  // chrome.contextMenus.create({
-  //   title: "Add Post Data",
-  //   contexts: ["all"],
-  //   onclick: onClickAddPostData,
-  //   documentUrlPatterns: ["*://*.facebook.com/*"]
-  // });
 })();

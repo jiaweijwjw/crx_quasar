@@ -14,7 +14,7 @@
       :selected-rows-label="getSelectedString"
       selection="multiple"
       :selected.sync="selected"
-      no-data-label="No text added yet."
+      no-data-label="No chunk added yet."
     >
     </q-table>
   </div>
@@ -36,7 +36,6 @@ export default {
           required: true,
           label: "Text",
           align: "left",
-          // field: row => row.some.nested.prop,
           field: row => row.text,
           format: val => `${val}`,
           sortable: true
@@ -45,7 +44,7 @@ export default {
           name: "url",
           align: "left",
           label: "Url",
-          field: "url",
+          field: row => row.url,
           sortable: true
         }
       ]
@@ -79,7 +78,6 @@ export default {
   methods: {
     ...mapActions("chunkstore", ["setSelectedChunks"]),
     getSelectedString() {
-      // there is a @selection event
       return this.selected.length === 0
         ? ""
         : `${this.selected.length} chunk${

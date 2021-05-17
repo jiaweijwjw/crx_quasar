@@ -14,10 +14,17 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
   name: "PopupLayout",
   data() {
     return {};
+  },
+  methods: {
+    ...mapActions("settingsstore", ["initCrxPopup"])
+  },
+  async created() {
+    await this.initCrxPopup();
   }
 };
 </script>

@@ -82,7 +82,6 @@ export default {
   methods: {
     ...mapActions("fbpoststore", ["addPost", "setSelectedPosts"]),
     getSelectedString() {
-      // there is a @selection event
       return this.selected.length === 0
         ? ""
         : `${this.selected.length} post${

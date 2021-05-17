@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh lpr fff">
     <q-drawer
-      v-model="sidedrawer"
+      v-model="sideDrawer"
       :width="250"
       :breakpoint="500"
       overlay
@@ -45,6 +45,7 @@
     <q-page-container>
       <router-view :drawerStatusToggle="drawerStatusToggle" />
     </q-page-container>
+    <!-- q-page-sticky has to be at the bottom -->
     <q-page-sticky v-if="drawerStatusToggle" position="left">
       <q-btn
         dense
@@ -71,15 +72,12 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
-import Storage from "../services/storage.access";
+import { mapGetters, mapActions } from "vuex";
 import { uid } from "quasar";
 export default {
   name: "BrowserLayout",
   data() {
     return {
-      drawerStatusToggle: null,
-      sidedrawer: false,
       menuList: [
         {
           icon: "post_add",
@@ -100,71 +98,81 @@ export default {
   methods: {
     ...mapActions("chunkstore", ["initChunkData", "addChunk"]),
     ...mapActions("fbpoststore", ["initPostData", "addPost"]),
-    async initCrxSettings() {
-      Storage.get("drawerStatusToggle").then(res => {
-        console.log("initialload, drawer is: " + res);
-        this.drawerStatusToggle = res;
-      });
-    },
+    ...mapActions("settingsstore", [
+      "initCrxBrowser",
+      "setDrawerStatusToggle",
+      "setSideDrawer"
+    ]),
     toggleDrawer() {
       this.drawerStatusToggle = !this.drawerStatusToggle;
-      Storage.save("drawerStatusToggle", this.drawerStatusToggle);
+      // WHAT IS THIS FOR???
       this.$q.bex.send("toggle.drawer", {
         showDrawer: this.drawerStatusToggle
       });
     },
     toggleSideDrawer() {
-      this.sidedrawer = !this.sidedrawer;
+      this.sideDrawer = !this.sideDrawer;
+    }
+  },
+  computed: {
+    ...mapGetters("settingsstore", ["getDrawerStatusToggle", "getSideDrawer"]),
+    drawerStatusToggle: {
+      get: function() {
+        return this.getDrawerStatusToggle;
+      },
+      set: function(newStatus) {
+        this.setDrawerStatusToggle(newStatus);
+      }
+    },
+    sideDrawer: {
+      get: function() {
+        return this.getSideDrawer;
+      },
+      set: function(newStatus) {
+        this.setSideDrawer(newStatus);
+      }
     }
   },
   async created() {
+    await this.initCrxBrowser();
     await this.initChunkData();
     await this.initPostData();
-    await this.initCrxSettings();
 
     let self = this;
 
+    /*
+     * chunk is sent from background script so the content is already available there, dont have to resend
+     * fbpost is sent from content script instead so we have to send the post content to background script (to access chrome.storage) via addpost
+     */
     chrome.runtime.onMessage.addListener(function(
       parcel,
       sender,
       sendResponse
     ) {
-      // from backgroundscript contextmenu
       console.log(
         sender.tab
-          ? "from a content script:" + sender.tab.url
+          ? "from a content script: " + sender.tab.url
           : "from the extension"
       );
+      console.log(parcel.message);
       if (parcel.message == "new.chunk.added") {
+        // from background script contextmenu
         let id = uid();
         let chunk = {
           id,
           text: parcel.content.text,
           url: parcel.content.url
         };
-        console.log(chunk);
-        self.addChunk(chunk); // cannot use 'this' as the 'this' context is not correct somehow.
+        self.addChunk(chunk); // cannot use 'this' as the 'this' context is not the same.
         sendResponse({ id: id });
       }
-    });
 
-    chrome.runtime.onMessage.addListener(function(
-      parcel,
-      sender,
-      sendResponse
-    ) {
-      // from contentscript: facebook.com
-      console.log(
-        sender.tab
-          ? "from a content script:" + sender.tab.url
-          : "from the extension"
-      );
       /* from chrome docs:
-    This function becomes invalid when the event listener returns, unless you return true from the event listener to indicate you wish to
-    send a response asynchronously (this will keep the message channel open to the other end until sendResponse is called).
-     */
+       * This function becomes invalid when the event listener returns, unless you return true from the event listener to indicate you wish to
+       * send a response asynchronously (this will keep the message channel open to the other end until sendResponse is called).
+       */
       if (parcel.message == "new.fb.post.added") {
-        console.log(parcel.content);
+        // from content script: facebook.com
         let id = uid();
         let post = {
           id,
@@ -172,7 +180,6 @@ export default {
           postBody: parcel.content.postBody,
           comments: parcel.content.comments
         };
-        console.log(post);
         self
           .addPost(post)
           .then(() => {
@@ -180,7 +187,7 @@ export default {
           })
           .catch(() => {
             sendResponse({ message: "fail" });
-          }); // cannot use 'this' as the 'this' context is not correct somehow.
+          });
         return true; // return true to indicate we will be sending a response asynchronously.
       }
     });
