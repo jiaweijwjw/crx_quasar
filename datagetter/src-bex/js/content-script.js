@@ -1,6 +1,9 @@
 // Content script content goes here or in activatedContentHooks (use activatedContentHooks if you need a variable
 // accessible to both the content script and inside a hook
 
+// TAKE NOTE OF THE ORDER OF CONTENT SCRIPTS IN MANIFEST FILE. DO NOT REARRANGE
+// the content scripts are concatenated and injected according to the order there
+
 let drawerStatusToggle = null;
 let appStatusToggle = null;
 

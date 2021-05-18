@@ -6,7 +6,7 @@ import AddFbPostPage from "src/pages/AddFbPostPage.vue";
 import PopupPage from "pages/PopupPage.vue";
 import Error404 from "pages/Error404.vue";
 
-const DEFAULT_ROUTE = "AddChunkPage";
+const DEFAULT_ROUTE = "AddChunkPage"; // defined desired 'home' page here.
 const routes = [
   {
     path: "/",

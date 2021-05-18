@@ -175,6 +175,7 @@ export default {
           id,
           author: parcel.content.author,
           postBody: parcel.content.postBody,
+          metaData: parcel.content.metaData,
           comments: parcel.content.comments
         };
         self
