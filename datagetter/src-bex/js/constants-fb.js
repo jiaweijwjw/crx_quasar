@@ -1,5 +1,5 @@
 const addPostBtnStyle = {
-  color: "#d33682",
+  color: "#fdf6e3",
   backgroundColor: "#002b36",
   border: "medium ridge #073642",
   fontSize: "small",
@@ -8,6 +8,18 @@ const addPostBtnStyle = {
   margin: "0 3px 0 0",
   padding: "0 3px 0 3px",
   textAlign: "centre"
+};
+const addPostBtnSuccessStyle = {
+  color: "#859900",
+  border: "medium ridge #859900"
+};
+const addPostBtnFailStyle = {
+  color: "#dc322f",
+  border: "medium ridge #dc322f"
+};
+const addPostBtnNotTotalSuccessStyle = {
+  color: "#b58900"
+  // border: "medium ridge #b58900"
 };
 const whichFacebookViewEnum = Object.freeze({
   NEWSFEED: 1,

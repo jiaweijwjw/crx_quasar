@@ -15,10 +15,13 @@
 
 /* unused */
 .btnEl {
-  color: "yellow";
-  background-color: "blue";
-  border: "thick solid #000000";
-  font-size: "small";
-  cursor: "pointer";
-  margin-right: "8px";
+  color: "#d33682" !important;
+  background-color: "#002b36" !important;
+  border: "medium ridge #073642" !important;
+  font-size: "small" !important;
+  box-shadow: "1px 1px 2px 0px #000" !important;
+  cursor: "pointer" !important;
+  margin: "0 3px 0 0" !important;
+  padding: "0 3px 0 3px" !important;
+  text-align: "centre" !important;
 }

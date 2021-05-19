@@ -1,9 +1,9 @@
-const isWhichBodyPart = childOfMiddle => {
-  if (childOfMiddle.hasAttributes()) {
-    const id = childOfMiddle.getAttribute("id");
-    const classesInNode = childOfMiddle.classList;
-    const dir = childOfMiddle.getAttribute("dir");
-    const tagName = childOfMiddle.tagName;
+const isWhichBodyPart = part => {
+  if (part.hasAttributes()) {
+    const id = part.getAttribute("id");
+    const classesInNode = part.classList;
+    const dir = part.getAttribute("dir");
+    const tagName = part.tagName;
     console.log(tagName);
     if (classesInNode.length === 0 && dir === "auto") {
       return postBodyPartEnum.TEXT;
@@ -37,34 +37,6 @@ const isWhichBodyPart = childOfMiddle => {
   }
 };
 
-const digestBodyText = textChild => {
-  return textChild.textContent;
-};
-
-const digestBodyBlockQuote = blockQuoteChild => {
-  return blockQuoteChild.querySelector(POST_BODY_BLOCK_QUOTE).textContent;
-};
-
-const digestBodyOtherFbPost = otherFbPostChild => {
-  return otherFbPostChild
-    .querySelector(POST_BODY_OTHER_FB_POST_LINK)
-    .getAttribute("href");
-};
-
-const digestBodyOwnContent = ownContentChild => {
-  const ext_link = ownContentChild.querySelector(
-    POST_BODY_OWN_CONTENT_EXT_LINK
-  );
-  const video = ownContentChild.querySelector(POST_BODY_OWN_CONTENT_VIDEO);
-  if (ext_link) {
-    return ext_link.getAttribute("href");
-  } else if (video) {
-    return "Content is a video.";
-  } else {
-    return "Unknown own content.";
-  }
-};
-
 const getAllReplies = listOfReplies => {
   let replies = [];
   if (listOfReplies.length === 0) {
@@ -75,7 +47,6 @@ const getAllReplies = listOfReplies => {
       let comment = {};
       let commentor = { name: "", fbLink: "" };
       let said = {};
-      let reactions = {};
       const individualCommentCommonParent = listOfReplies[i].querySelector(
         INDIVIDUAL_COMMENT_COMMON_PARENT
       );
@@ -134,7 +105,8 @@ const getAllReplies = listOfReplies => {
 };
 
 const getMetaData = metaSection => {
-  let metaData = { numOfComments: null, numOfShares: null };
+  let metaData = {};
+  let hasError = false;
   let reactionsData = { totalReactionsCount: null };
   const reactionsSection = metaSection.querySelector(META_REACTIONS_SECTION);
   const numCommentsSharesSection = metaSection.querySelector(
@@ -148,67 +120,124 @@ const getMetaData = metaSection => {
         node.tagName === "DIV"
     ); // childrenArray should only have the total reaction count part
     console.log(childrenArray);
-    let totalReactionsCount = Number(
-      childrenArray[0].querySelector(
-        META_REACTIONS_SECTION_TOTAL_REACTIONS_COUNT
-      ).textContent
+    const totalReactionsCountEl = childrenArray[0].querySelector(
+      META_REACTIONS_SECTION_TOTAL_REACTIONS_COUNT
     );
-    console.log(totalReactionsCount);
-    reactionsData.totalReactionsCount = totalReactionsCount;
+    if (totalReactionsCountEl) {
+      let totalReactionsCount = Number(totalReactionsCountEl.textContent);
+      console.log(totalReactionsCount);
+      reactionsData.totalReactionsCount = totalReactionsCount;
+    } else {
+      console.log("Error in getting totalReactionsCount.");
+      hasError = true;
+    }
     const listOfReactions = reactionsSection.querySelector(
       META_LIST_OF_REACTIONS
     ).children;
-    for (let r = 0; r < listOfReactions.length; r++) {
-      const reactionTypeString = listOfReactions[r]
-        .querySelector(META_EACH_IN_LIST_OF_REACTIONS)
-        .getAttribute("aria-label");
-      const reactionType = reactionTypeString.substring(
-        0,
-        reactionTypeString.indexOf(":")
-      );
-      const reactionImgSrc = listOfReactions[r]
-        .querySelector(META_EACH_IN_LIST_OF_REACTIONS_IMG_SRC)
-        .getAttribute("src");
-      const reactionCountString = reactionTypeString.slice(
-        reactionTypeString.indexOf(":") + 2 // slice() doesnt include the 'end' then an additional 1 for the space
-      );
-      const reactionCount = Number(
-        reactionCountString.substring(0, reactionCountString.indexOf(" "))
-      );
-      reactionsData[reactionType] = {
-        reactionCount,
-        reactionImgSrc
-      };
+    if (listOfReactions) {
+      for (let r = 0; r < listOfReactions.length; r++) {
+        const reactionTypeString = listOfReactions[r]
+          .querySelector(META_EACH_IN_LIST_OF_REACTIONS)
+          .getAttribute("aria-label");
+        const reactionType = reactionTypeString.substring(
+          0,
+          reactionTypeString.indexOf(":")
+        );
+        const reactionImgSrc = listOfReactions[r]
+          .querySelector(META_EACH_IN_LIST_OF_REACTIONS_IMG_SRC)
+          .getAttribute("src");
+        const reactionCountString = reactionTypeString.slice(
+          reactionTypeString.indexOf(":") + 2 // slice() doesnt include the 'end' then an additional 1 for the space
+        );
+        const reactionCount = Number(
+          reactionCountString.substring(0, reactionCountString.indexOf(" "))
+        );
+        reactionsData[reactionType] = {
+          reactionCount,
+          reactionImgSrc
+        };
+      }
+    } else {
+      console.log("Error in getting the list of reactions.");
+      hasError = true;
     }
     metaData["reactionsData"] = reactionsData;
   } else {
-    console.log("cant find reactions section");
+    console.log("Failed to find reactionsSection.");
+    hasError = true;
   }
   if (numCommentsSharesSection) {
-    const numOfCommentsString =
-      numCommentsSharesSection.children[0].textContent;
-    const numOfSharesString = numCommentsSharesSection.children[1].textContent;
-    metaData.numOfComments = Number(
-      numOfCommentsString.slice(0, numOfCommentsString.indexOf(" "))
-    );
-    metaData.numOfShares = Number(
-      numOfSharesString.slice(0, numOfSharesString.indexOf(" "))
-    );
+    for (let i = 0; i < numCommentsSharesSection.children.length; i++) {
+      const numString = numCommentsSharesSection.children[i].textContent;
+      if (numString) {
+        const splitArray = numString.split(" ");
+        metaData[splitArray[1]] = Number(splitArray[0]);
+      }
+    }
   } else {
-    console.log("cant find num comments shares sections");
+    console.log("Failed to find numCommentsSharesSection.");
+    hasError = true;
   }
-  return metaData;
+  return { metaData, hasError };
+};
+
+const renderBtnFeedback = (
+  btnEl,
+  addPostOutcome,
+  hasErrorGettingSomeData = false
+) => {
+  if (addPostOutcome) {
+    console.log("Successfully added this post.");
+    Object.assign(btnEl.style, addPostBtnSuccessStyle);
+    btnEl.textContent = "ADDED";
+    if (hasErrorGettingSomeData) {
+      console.log("But there was error in collecting some data.");
+      Object.assign(btnEl.style, addPostBtnNotTotalSuccessStyle);
+    }
+  } else {
+    console.log("Failed to add this post.");
+    Object.assign(btnEl.style, addPostBtnFailStyle);
+    btnEl.textContent = "FAILED TO ADD";
+  }
+};
+
+const digestBodyText = textChild => {
+  return textChild.textContent;
+};
+
+const digestBodyBlockQuote = blockQuoteChild => {
+  return blockQuoteChild.querySelector(POST_BODY_BLOCK_QUOTE).textContent;
+};
+
+const digestBodyOtherFbPost = otherFbPostChild => {
+  return otherFbPostChild
+    .querySelector(POST_BODY_OTHER_FB_POST_LINK)
+    .getAttribute("href");
+};
+
+const digestBodyOwnContent = ownContentChild => {
+  const ext_link = ownContentChild.querySelector(
+    POST_BODY_OWN_CONTENT_EXT_LINK
+  );
+  const video = ownContentChild.querySelector(POST_BODY_OWN_CONTENT_VIDEO);
+  if (ext_link) {
+    return ext_link.getAttribute("href");
+  } else if (video) {
+    return "Content is a video.";
+  } else {
+    return "Unknown own content.";
+  }
 };
 
 const getPostData = event => {
+  const btnEl = event.target;
   let top, middle, bottom;
   let author = { name: "", fbLink: "" };
   let comments = [];
   let postBody = {};
   let metaData = {};
-  // const view = parseInt(event.target.getAttribute("view")); // unused for now
+  let hasErrorGettingSomeData = false;
   const postCommonParent = event.target.closest(POST_COMMON_PARENT);
-  console.log(postCommonParent);
   if (postCommonParent) {
     const childrenArray = Array.from(postCommonParent.childNodes).filter(
       node => node.hasChildNodes() && node.classList.length === 0 // filterning classList.length === 0 is to remove advertisements.
@@ -216,60 +245,95 @@ const getPostData = event => {
     top = childrenArray[0];
     middle = childrenArray[1];
     bottom = childrenArray[2];
-    const authorNode = top.querySelector(POST_AUTHOR);
-    if (authorNode) {
-      author.name = authorNode.textContent || `unable to get author's name`;
-      author.fbLink = authorNode.getAttribute("href");
-    }
-    for (let p = 0; p < middle.children.length; p++) {
-      const bodyPart = isWhichBodyPart(middle.children[p]);
-      switch (bodyPart) {
-        case postBodyPartEnum.TEXT:
-          console.log("text");
-          postBody["text"] = digestBodyText(middle.children[p]);
-          break;
-        case postBodyPartEnum.BLOCKQUOTE:
-          console.log("blockquote");
-          postBody["blockQuote"] = digestBodyBlockQuote(middle.children[p]);
-          break;
-        case postBodyPartEnum.OTHER_FB_POST:
-          console.log("other fb post");
-          postBody["otherFbPost"] = digestBodyOtherFbPost(middle.children[p]);
-          break;
-        case postBodyPartEnum.OWN_CONTENT:
-          console.log("own content");
-          postBody["ownContent"] = digestBodyOwnContent(middle.children[p]);
-          break;
-        case postBodyPartEnum.UNKNOWN:
-          console.log("unknown body part");
-          break;
-        default:
-          console.log("switch statement which body part not working");
+    if (top) {
+      const authorNode = top.querySelector(POST_AUTHOR);
+      if (authorNode) {
+        author.name = authorNode.textContent || `Unable to get author's name.`;
+        author.fbLink = authorNode.getAttribute("href");
+      } else {
+        author.name = `Unable to get author's name.`;
+        author.fbLink = "Unable to get link to post.";
+        hasErrorGettingSomeData = true;
       }
-    }
-    console.log(postBody);
-    const metaSection = bottom.querySelector(POST_META_SECTION);
-    console.log(metaSection);
-    const commentsSection = bottom.querySelector(COMMENTS_SECTION);
-    console.log(commentsSection); // an unordered list
-    if (metaSection) {
-      metaData = getMetaData(metaSection);
     } else {
-      console.log("cant find metaSection");
+      hasErrorGettingSomeData = true;
     }
-    console.log(metaData);
-    if (commentsSection) {
-      comments = getAllReplies(commentsSection.children);
+    if (middle) {
+      let part = null;
+      for (let p = 0; p < middle.children.length; p++) {
+        part = middle.children[p];
+        const bodyPart = isWhichBodyPart(part);
+        switch (bodyPart) {
+          case postBodyPartEnum.TEXT:
+            postBody["text"] = digestBodyText(part);
+            break;
+          case postBodyPartEnum.BLOCKQUOTE:
+            postBody["blockQuote"] = digestBodyBlockQuote(part);
+            break;
+          case postBodyPartEnum.OTHER_FB_POST:
+            postBody["otherFbPost"] = digestBodyOtherFbPost(part);
+            break;
+          case postBodyPartEnum.OWN_CONTENT:
+            postBody["ownContent"] = digestBodyOwnContent(part);
+            break;
+          case postBodyPartEnum.UNKNOWN:
+            console.log("Unknown post body part.");
+            hasErrorGettingSomeData = true;
+            break;
+          default:
+            console.log("Error detecting which post body part.");
+            hasErrorGettingSomeData = true;
+        }
+      }
     } else {
-      console.log("cant find commentsSection.");
+      hasErrorGettingSomeData = true;
+    }
+    if (bottom) {
+      const metaSection = bottom.querySelector(POST_META_SECTION);
+      const commentsSection = bottom.querySelector(COMMENTS_SECTION);
+      if (metaSection) {
+        let metaResults = getMetaData(metaSection);
+        metaData = metaResults.metaData;
+        if (metaResults.hasError) {
+          hasErrorGettingSomeData = true;
+        }
+      } else {
+        console.log("Failed to find metaSection");
+        hasErrorGettingSomeData = true;
+      }
+      console.log(metaData);
+      if (commentsSection) {
+        comments = getAllReplies(commentsSection.children);
+      } else {
+        console.log("Failed to find commentsSection.");
+        console.log("Could be there are no comments on this post.");
+      }
+    } else {
+      hasErrorGettingSomeData = true;
     }
   } else {
-    console.log("cant find postCommonParent.");
+    console.log("Failed to find postCommonParent.");
+    renderBtnFeedback(btnEl, false);
+    return;
   }
-  sendPostToCrx(author, postBody, metaData, comments);
+  sendPostToCrx(
+    author,
+    postBody,
+    metaData,
+    comments,
+    btnEl,
+    hasErrorGettingSomeData
+  );
 };
 
-const sendPostToCrx = (author, postBody, metaData, comments) => {
+const sendPostToCrx = (
+  author,
+  postBody,
+  metaData,
+  comments,
+  btnEl,
+  hasErrorGettingSomeData
+) => {
   let parcel = {
     message: "new.fb.post.added",
     content: {
@@ -281,6 +345,7 @@ const sendPostToCrx = (author, postBody, metaData, comments) => {
   };
   chrome.runtime.sendMessage(parcel, res => {
     console.log(res);
+    renderBtnFeedback(btnEl, res, hasErrorGettingSomeData);
     // can make use of the res to indicate to user that the post has been added. (change the el style)
   });
 };
@@ -312,10 +377,7 @@ const setupMutationObserver = (targetNode, view) => {
                       attrs[y].value !== "FeedUnit_1"
                     ) {
                       renderAddPostButton(
-                        mutation.addedNodes[i].querySelector(
-                          POST_COMMON_PARENT
-                        ),
-                        view
+                        mutation.addedNodes[i].querySelector(POST_COMMON_PARENT)
                       );
                     }
                   }
@@ -335,8 +397,7 @@ const setupMutationObserver = (targetNode, view) => {
                   } else if (z == 0) {
                     // all the classes present in this new addedNode matches the classes required for it to be a post.
                     renderAddPostButton(
-                      mutation.addedNodes[i].querySelector(POST_COMMON_PARENT),
-                      view
+                      mutation.addedNodes[i].querySelector(POST_COMMON_PARENT)
                     );
                   }
                 }
@@ -349,25 +410,26 @@ const setupMutationObserver = (targetNode, view) => {
   };
   const observer = new MutationObserver(callback);
   observer.observe(targetNode, config);
-  // observer.disconnect();
+  // observer.disconnect(); where to add this disconnect?
 };
 
-const renderAddPostButton = (postCommonParent, view) => {
+const renderAddPostButton = postCommonParent => {
   if (!postCommonParent) return;
+  let childrenArray;
   let top;
-  let childrenArray = Array.from(postCommonParent.childNodes).filter(node =>
+  let linkToOpenPostInOwnPage;
+  childrenArray = Array.from(postCommonParent.childNodes).filter(node =>
     node.hasChildNodes()
   );
   top = childrenArray[0];
-  let linkToOpenPostInOwnPage = top.querySelector(
+  linkToOpenPostInOwnPage = top.querySelector(
     ADDPOST_BTN_SIBLING // the addpost button will be rendered beside this element (on the left).
   );
   const btnEl = document.createElement("span");
   const textNode = document.createTextNode("ADD THIS POST");
   Object.assign(btnEl.style, addPostBtnStyle);
-  btnEl.setAttribute("view", view);
-  // btnEl.classList.add("btnEl"); somehow cannot detect the class from content-css.css
   btnEl.appendChild(textNode);
+  // btnEl.classList.add("btnEl"); // somehow cannot detect the class from content-css.css
   btnEl.onclick = event => {
     getPostData(event);
   };
@@ -377,55 +439,58 @@ const renderAddPostButton = (postCommonParent, view) => {
   );
 };
 
-const initFacebookApp = () => {
-  {
-    let postsContainer = { el: null, view: null }; // for knowing which kind of page to render the addpost btn. E.g the homepage newsfeed
-    let posts = null;
-    const newsFeed = document.querySelector(NEWSFEED);
-    const pageFeed = document.querySelector(PAGEFEED);
-    if (newsFeed) {
-      postsContainer.el = newsFeed;
-      postsContainer.view = whichFacebookViewEnum.NEWSFEED;
+const initFacebookApp = postsContainer => {
+  if (!postsContainer) return;
+  let posts = null;
+  posts = (function() {
+    switch (postsContainer.view) {
+      case whichFacebookViewEnum.NEWSFEED:
+        return postsContainer.el.querySelectorAll(NEWSFEED_POST);
+      case whichFacebookViewEnum.PAGE:
+        return postsContainer.el.querySelectorAll(PAGEFEED_POST);
+      default:
+        return null;
     }
-    if (pageFeed) {
-      postsContainer.el = pageFeed;
-      postsContainer.view = whichFacebookViewEnum.PAGE;
-    }
-    if (!newsFeed && !pageFeed) {
-      console.log("unable to get newsfeed or page data.");
-      return;
-    }
-    setupMutationObserver(postsContainer.el, postsContainer.view);
-    // can find other ways to check which facebook view is it? can make the code more reusable if can find a way to check and pass in as params to this function.
-    if (postsContainer.view === whichFacebookViewEnum.NEWSFEED) {
-      posts = newsFeed.querySelectorAll(NEWSFEED_POST);
-    }
-    if (postsContainer.view === whichFacebookViewEnum.PAGE) {
-      posts = pageFeed.querySelectorAll(PAGEFEED_POST);
-      // posts = pageFeed.querySelectorAll("div.lzcic4wl[role='article']"); // can do this also but make it same as the detected childNodes in mutation observer to make it more standardized.
-    }
-    if (!posts) {
-      console.log("unable to get posts.");
-      return;
-    }
-    console.log("number of posts: " + posts.length);
-    for (let value of posts.values()) {
-      console.log(value);
-    }
-    for (let i = 0; i < posts.length; i++) {
-      // somehow FeedUnit_1 is always empty, not pointing to the second post. Post number 2 onwards starts from index 2.
-      // this is only for newsfeed.
-      if (i == 1 && postsContainer.view === whichFacebookViewEnum.NEWSFEED) {
-        continue;
-      }
-      console.log(i);
-      let post = posts[i];
-      renderAddPostButton(
-        post.querySelector(POST_COMMON_PARENT),
-        postsContainer.view
-      );
-    }
+  })(postsContainer);
+  if (!posts) {
+    console.log("Error detecting posts on this pageview.");
+    return;
   }
+  setupMutationObserver(postsContainer.el, postsContainer.view);
+  console.log("Initial number of posts detected: " + posts.length);
+  for (let value of posts.values()) {
+    console.log(value);
+  }
+  for (let i = 0; i < posts.length; i++) {
+    // for newsfeed pageview: somehow FeedUnit_1 is always empty, not pointing to the second post. Post number 2 onwards starts from index 2.
+    if (postsContainer.view === whichFacebookViewEnum.NEWSFEED && i == 1) {
+      continue;
+    }
+    console.log(i);
+    let post = posts[i];
+    renderAddPostButton(post.querySelector(POST_COMMON_PARENT));
+  }
+};
+
+const detectPageView = () => {
+  // is there any other way of knowing the facebook page view other than querying all the different types?
+  let postsContainer = { el: null, view: null }; // for knowing which kind of page to render the addpost btn. E.g the homepage newsfeed
+  const newsFeed = document.querySelector(NEWSFEED);
+  const pageFeed = document.querySelector(PAGEFEED);
+  if (newsFeed) {
+    postsContainer.el = newsFeed;
+    postsContainer.view = whichFacebookViewEnum.NEWSFEED;
+  }
+  if (pageFeed) {
+    postsContainer.el = pageFeed;
+    postsContainer.view = whichFacebookViewEnum.PAGE;
+  }
+  // Add support for more types of page views such as group / individual post here.
+  if (!newsFeed && !pageFeed) {
+    console.log("Error detecting facebook page view.");
+    return null;
+  }
+  return postsContainer;
 };
 
 document.onreadystatechange = function() {
@@ -435,6 +500,7 @@ document.onreadystatechange = function() {
     appStatusToggle
   ) {
     // For now have to refresh the page after toggling on/off on extension popup
-    initFacebookApp();
+    const postsContainer = detectPageView();
+    initFacebookApp(postsContainer);
   }
 };

@@ -181,10 +181,10 @@ export default {
         self
           .addPost(post)
           .then(() => {
-            sendResponse({ message: "success" });
+            sendResponse(true);
           })
           .catch(() => {
-            sendResponse({ message: "fail" });
+            sendResponse(false);
           });
         return true; // return true to indicate we will be sending a response asynchronously.
       }
