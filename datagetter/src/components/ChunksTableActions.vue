@@ -53,6 +53,7 @@ export default {
   methods: {
     ...mapActions("chunkstore", ["deleteChunks", "deleteAllChunks"]),
     async save(saveType, fileType) {
+      // Can extract saving of files functionality into a service.
       let collated = [];
       let options = {};
       let fileName = "";
@@ -94,7 +95,13 @@ export default {
       // chunksToCollate is an array of {id, text, url} objects
       let title = "Text, Url \n";
       let collated = title.concat(
-        chunksToCollate.map(chunk => chunk.text + "," + chunk.url).join("\n")
+        chunksToCollate
+          .map(chunk => {
+            const textPortion = chunk.text.replace(/"/g, '""'); // regex g modifier to replace all. or use the replaceAll() function.
+            const urlPortion = chunk.url.replace(/"/g, '""');
+            return `\"` + textPortion + `\"` + "," + `\"` + urlPortion + `\"`;
+          })
+          .join("\n")
       );
       return collated;
     },

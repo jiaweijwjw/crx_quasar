@@ -14,6 +14,7 @@
         }
       };
       chrome.runtime.sendMessage(parcel, res => {
+        console.log(res);
         chrome.storage.sync.get(["chunks"], function(results) {
           let chunkObj = results["chunks"] ? results["chunks"] : {}; // value = obj[key]
           let newChunk = { [res.id]: { id: res.id, text, url } }; // es6 computed property names
