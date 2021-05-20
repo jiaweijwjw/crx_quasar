@@ -39,19 +39,51 @@
         `Storage key "${key}" in namespace "${namespace}" changed.`,
         `Old value was "${oldValue}", new value is "${newValue}".`
       );
-      if (key === "appStatusToggle" && namespace === "sync") {
-        let parcel = {
-          message: "app.status",
-          content: { onApp: null }
-        };
+      // use: ( a === b || a === c ). ( a === ( b || c )) does not work
+      if (
+        (key === "appStatusToggle" && namespace === "sync") ||
+        (key === "drawerStatusToggle" && namespace === "sync")
+      ) {
         console.log("newvalue: " + newValue);
-        chrome.tabs.query({ active: true, currentWindow: true }, function(
-          tabs
-        ) {
-          parcel.content.onApp = newValue;
-          chrome.tabs.sendMessage(tabs[0].id, parcel);
-        });
+        const msg = key === "appStatusToggle" ? "app.status" : "toggle.drawer";
+        const status = key === "appStatusToggle" ? "onApp" : "showDrawer";
+        let parcel = {
+          message: msg,
+          content: {
+            [status]: null
+          }
+        };
+        chrome.tabs.query(
+          {
+            active: true,
+            currentWindow: true
+          },
+          function(tabs) {
+            parcel.content[status] = newValue;
+            chrome.tabs.sendMessage(tabs[0].id, parcel);
+            // DO NOT OPEN Dev Tools when using/testing this functionality.
+            // A recent change in the API will not return the Dev Tools tab. So if you're debugging your extension and the Dev Tools window is open and focused,
+            // the array will be empty. the id will be undefined, causing the crx to stop working.
+          }
+        );
       }
+    }
+  });
+
+  chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
+    if (parcel.message === "initial.get") {
+      console.log(sender);
+      chrome.storage.sync.get(
+        ["appStatusToggle", "drawerStatusToggle"],
+        results => {
+          console.log(results);
+          sendResponse({
+            appStatusToggle: results.appStatusToggle,
+            drawerStatusToggle: results.drawerStatusToggle
+          });
+        }
+      );
+      return true; // Getting from chrome.storage is asynchronous. return true to indicate we will be sending a response asynchronously.
     }
   });
 

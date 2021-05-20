@@ -64,39 +64,36 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
     });
   });
 
-  bridge.on("initial.get", event => {
-    // get initial app and drawer status at content script side
-    const payload = event.data;
-    if (payload.msg === "getInitialStatuses") {
-      chrome.storage.sync.get(
-        ["appStatusToggle", "drawerStatusToggle"],
-        results => {
-          bridge.send(event.eventResponseKey, results);
-        }
-      );
-    }
-  });
+  // bridge.on("initial.get", event => {
+  //   // get initial app and drawer status at content script side
+  //   const payload = event.data;
+  //   if (payload.msg === "getInitialStatuses") {
+  //     chrome.storage.sync.get(
+  //       ["appStatusToggle", "drawerStatusToggle"],
+  //       results => {
+  //         bridge.send(event.eventResponseKey, results);
+  //       }
+  //     );
+  //   }
+  // });
 
-  // Every tab will trigger this
+  // If use bridge to send status, will be triggered by every tab.
   // chrome.storage.onChanged.addListener(function(changes, namespace) {
   //   for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
   //     console.log(
   //       `Storage key "${key}" in namespace "${namespace}" changed.`,
   //       `Old value was "${oldValue}", new value is "${newValue}".`
   //     );
-  //     if (key === "appStatusToggle" && namespace === "sync") {
+  //     if (
+  //       (key === "appStatusToggle" && namespace === "sync") ||
+  //       (key === "drawerStatusToggle" && namespace === "sync")
+  //     ) {
   //       console.log("newvalue: " + newValue);
-  //       if (newValue === true) {
-  //         // if (newValue) {} else {}
-  //         // bridge.send("app.status", {
-  //         //   onApp: true
-  //         // });
-  //       }
-  //       if (newValue === false) {
-  //         // bridge.send("app.status", {
-  //         //   onApp: false
-  //         // });
-  //       }
+  //       const msg = key === "appStatusToggle" ? "app.status" : "toggle.drawer";
+  //       const status = key === "appStatusToggle" ? "onApp" : "showDrawer";
+  //       bridge.send(msg, {
+  //         [status]: newValue
+  //       });
   //     }
   //   }
   // });

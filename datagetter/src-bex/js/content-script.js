@@ -60,16 +60,8 @@ const initBrowserApp = (initialAppStatusToggle, initialDrawerStatusToggle) => {
   }
 };
 
-(function() {
-  // IIFE. When the page loads, insert the browser extension code.
-  iFrame.src = chrome.runtime.getURL("www/index.html");
-  document.body.prepend(iFrame);
-})();
-
 chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
-  console.log(sender);
-  console.log(parcel);
-  if (parcel.message == "app.status") {
+  if (parcel.message === "app.status") {
     appStatusToggle = parcel.content.onApp;
     if (parcel.content.onApp) {
       drawerStatusToggle ? showDrawer() : hideDrawer();
@@ -78,6 +70,33 @@ chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
       offApp();
       stopCrxFb();
     }
-    // sendResponse();
+  }
+  if (parcel.message === "toggle.drawer") {
+    drawerStatusToggle = parcel.content.showDrawer;
+    if (parcel.content.showDrawer) {
+      showDrawer();
+    } else {
+      hideDrawer();
+    }
   }
 });
+
+// when content script is injected, ask for the app statuses from background script.
+// cant automatically send from background side because dont know when the content script is injected.
+function initialGetStatuses() {
+  let parcel = {
+    message: "initial.get"
+  };
+  chrome.runtime.sendMessage(parcel, res => {
+    drawerStatusToggle = res.drawerStatusToggle;
+    appStatusToggle = res.appStatusToggle;
+    initBrowserApp(res.appStatusToggle, res.drawerStatusToggle);
+  });
+}
+
+(function() {
+  // IIFE. When the page loads, insert the browser extension code.
+  initialGetStatuses();
+  iFrame.src = chrome.runtime.getURL("www/index.html");
+  document.body.prepend(iFrame);
+})();
