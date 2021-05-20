@@ -26,20 +26,14 @@ export default function attachContentHooks(bridge) {
     bridge.send(event.eventResponseKey);
   });
 
-  bridge.on("app.status", event => {
-    const payload = event.data;
-    appStatusToggle = payload.onApp;
-    if (payload.onApp) {
-      drawerStatusToggle ? showDrawer() : hideDrawer();
-      // if (
-      //   document.domain === "facebook.com" &&
-      //   document.readyState === "complete"
-      // ) {
-      //   initFacebookApp();
-      // }
-    } else {
-      offApp();
-    }
-    bridge.send(event.eventResponseKey);
-  });
+  // bridge.on("app.status", event => {
+  //   const payload = event.data;
+  //   appStatusToggle = payload.onApp;
+  //   if (payload.onApp) {
+  //     drawerStatusToggle ? showDrawer() : hideDrawer();
+  //   } else {
+  //     offApp();
+  //   }
+  //   bridge.send(event.eventResponseKey);
+  // });
 }

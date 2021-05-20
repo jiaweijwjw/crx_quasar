@@ -78,26 +78,26 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
   });
 
   // Every tab will trigger this
-  chrome.storage.onChanged.addListener(function(changes, namespace) {
-    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-      console.log(
-        `Storage key "${key}" in namespace "${namespace}" changed.`,
-        `Old value was "${oldValue}", new value is "${newValue}".`
-      );
-      if (key === "appStatusToggle" && namespace === "sync") {
-        console.log("newvalue: " + newValue);
-        if (newValue === true) {
-          // if (newValue) {} else {}
-          bridge.send("app.status", {
-            onApp: true
-          });
-        }
-        if (newValue === false) {
-          bridge.send("app.status", {
-            onApp: false
-          });
-        }
-      }
-    }
-  });
+  // chrome.storage.onChanged.addListener(function(changes, namespace) {
+  //   for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+  //     console.log(
+  //       `Storage key "${key}" in namespace "${namespace}" changed.`,
+  //       `Old value was "${oldValue}", new value is "${newValue}".`
+  //     );
+  //     if (key === "appStatusToggle" && namespace === "sync") {
+  //       console.log("newvalue: " + newValue);
+  //       if (newValue === true) {
+  //         // if (newValue) {} else {}
+  //         // bridge.send("app.status", {
+  //         //   onApp: true
+  //         // });
+  //       }
+  //       if (newValue === false) {
+  //         // bridge.send("app.status", {
+  //         //   onApp: false
+  //         // });
+  //       }
+  //     }
+  //   }
+  // });
 }

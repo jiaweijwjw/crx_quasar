@@ -32,12 +32,13 @@ export default {
 <style lang="sass" scoped>
 .q-layout
   background-color: $background !important
-  height: 300px
-  width: 300px
+  height: 200px
+  width: 200px
   overflow: auto
 .q-page-container
   background-color: $background !important
 .q-header
   background-color: $background2
   color: $cream
+  text-align: center
 </style>

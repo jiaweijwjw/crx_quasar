@@ -65,3 +65,19 @@ const initBrowserApp = (initialAppStatusToggle, initialDrawerStatusToggle) => {
   iFrame.src = chrome.runtime.getURL("www/index.html");
   document.body.prepend(iFrame);
 })();
+
+chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
+  console.log(sender);
+  console.log(parcel);
+  if (parcel.message == "app.status") {
+    appStatusToggle = parcel.content.onApp;
+    if (parcel.content.onApp) {
+      drawerStatusToggle ? showDrawer() : hideDrawer();
+      runCrxFb();
+    } else {
+      offApp();
+      stopCrxFb();
+    }
+    // sendResponse();
+  }
+});

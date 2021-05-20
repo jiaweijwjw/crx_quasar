@@ -31,4 +31,37 @@
     contexts: ["selection"],
     onclick: onClickAddChunk
   });
+
+  // Benefit of putting here is only send once. Here have to use chrome message passing instead of the bridge.
+  chrome.storage.onChanged.addListener(function(changes, namespace) {
+    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+      console.log(
+        `Storage key "${key}" in namespace "${namespace}" changed.`,
+        `Old value was "${oldValue}", new value is "${newValue}".`
+      );
+      if (key === "appStatusToggle" && namespace === "sync") {
+        let parcel = {
+          message: "app.status",
+          content: { onApp: null }
+        };
+        console.log("newvalue: " + newValue);
+        chrome.tabs.query({ active: true, currentWindow: true }, function(
+          tabs
+        ) {
+          parcel.content.onApp = newValue;
+          chrome.tabs.sendMessage(tabs[0].id, parcel);
+        });
+      }
+    }
+  });
+
+  // chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+  //   console.log(changeInfo);
+  //   console.log(tab);
+  //   if (changeInfo.status) {
+  //     chrome.tabs.sendMessage(tabId, {
+  //       message: "status.complete"
+  //     });
+  //   }
+  // });
 })();

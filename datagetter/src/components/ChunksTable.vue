@@ -7,7 +7,9 @@
       dense
       dark
       :visible-columns="visibleColumns"
-      color="primary"
+      color="cream"
+      card-class="bg-background2 text-textColor"
+      table-header-class="text-cream"
       rows-per-page-label="Chunks per page"
       :rows-per-page-options="[10, 0]"
       :pagination.sync="pagination"
@@ -38,6 +40,9 @@ export default {
           align: "left",
           field: row => row.text,
           format: val => `${val}`,
+          classes: "ellipsis",
+          style: "max-width: 50%",
+          headerStyle: "max-width: 50%",
           sortable: true
         },
         {
@@ -45,6 +50,9 @@ export default {
           align: "left",
           label: "Url",
           field: row => row.url,
+          classes: "ellipsis",
+          style: "max-width: 50%",
+          headerStyle: "max-width: 50%",
           sortable: true
         }
       ]

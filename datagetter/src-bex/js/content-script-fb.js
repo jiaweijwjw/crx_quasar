@@ -408,9 +408,17 @@ const setupMutationObserver = (targetNode, view) => {
       }
     });
   };
-  const observer = new MutationObserver(callback);
+  observer = new MutationObserver(callback);
   observer.observe(targetNode, config);
   // observer.disconnect(); where to add this disconnect?
+};
+
+const unrenderAddPostButton = () => {
+  const allRenderedAddPostBtns = document.querySelectorAll(".addpostbtn");
+  console.log(allRenderedAddPostBtns);
+  for (let i = 0; i < allRenderedAddPostBtns.length; i++) {
+    allRenderedAddPostBtns[i].parentNode.removeChild(allRenderedAddPostBtns[i]);
+  }
 };
 
 const renderAddPostButton = postCommonParent => {
@@ -429,7 +437,7 @@ const renderAddPostButton = postCommonParent => {
   const textNode = document.createTextNode("ADD THIS POST");
   Object.assign(btnEl.style, addPostBtnStyle);
   btnEl.appendChild(textNode);
-  // btnEl.classList.add("btnEl"); // somehow cannot detect the class from content-css.css
+  btnEl.classList.add("addpostbtn"); // somehow cannot detect the class from content-css.css
   btnEl.onclick = event => {
     getPostData(event);
   };
@@ -493,7 +501,8 @@ const detectPageView = () => {
   return postsContainer;
 };
 
-document.onreadystatechange = function() {
+// this function should only be called when everything is ready.
+function runCrxFb() {
   if (
     document.readyState === "complete" &&
     document.domain === "facebook.com" &&
@@ -503,4 +512,26 @@ document.onreadystatechange = function() {
     const postsContainer = detectPageView();
     initFacebookApp(postsContainer);
   }
+}
+
+function stopCrxFb() {
+  if (document.domain === "facebook.com" && !appStatusToggle) {
+    unrenderAddPostButton();
+    if (observer) {
+      observer.disconnect();
+    }
+  }
+}
+
+// handle case when app is already on and user goes to facebook domain
+document.onreadystatechange = function() {
+  runCrxFb();
 };
+
+// chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+//   console.log(request);
+//   console.log(sender);
+//   if (request.message === "status.complete") {
+//     runCrxFb();
+//   }
+// });

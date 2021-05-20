@@ -1,3 +1,5 @@
+let observer = null;
+
 const addPostBtnStyle = {
   color: "#fdf6e3",
   backgroundColor: "#002b36",
