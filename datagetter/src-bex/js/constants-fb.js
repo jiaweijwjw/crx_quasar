@@ -20,8 +20,8 @@ const addPostBtnFailStyle = {
   border: "medium ridge #dc322f"
 };
 const addPostBtnNotTotalSuccessStyle = {
-  color: "#b58900"
-  // border: "medium ridge #b58900"
+  color: "#b58900",
+  border: "medium ridge #b58900"
 };
 const whichFacebookViewEnum = Object.freeze({
   NEWSFEED: 1,
@@ -92,7 +92,7 @@ const META_REACTIONS_SECTION_TOTAL_REACTIONS_COUNT =
 const META_LIST_OF_REACTIONS =
   "span[aria-label='See who reacted to this'][role='toolbar'] > span[id^='jsc']";
 const META_EACH_IN_LIST_OF_REACTIONS = "div[role='button']";
-const META_EACH_IN_LIST_OF_REACTIONS_IMG_SRC = "img";
+// const META_EACH_IN_LIST_OF_REACTIONS_IMG_SRC = "img";
 const META_NUM_COMMENTSSHARES_SECTION =
   "div.bp9cbjyn.j83agx80.pfnyh3mw.p1ueia1e";
 const COMMENTS_SECTION =

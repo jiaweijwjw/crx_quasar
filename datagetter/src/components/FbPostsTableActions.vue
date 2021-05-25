@@ -1,29 +1,53 @@
 <template>
-  <div>
-    <q-btn
-      dense
-      label="download selected as json"
-      @click="save(tableActionOptions.SELECTED, tableActionOptions.JSON)"
-      color="cyan"
-    />
-    <q-btn
-      dense
-      label="download all as json"
-      @click="save(tableActionOptions.ALL, tableActionOptions.JSON)"
-      color="cyan"
-    />
-    <q-btn
-      dense
-      label="delete selected"
-      @click="remove(tableActionOptions.SELECTED)"
-      color="yellow"
-    />
-    <q-btn
-      dense
-      label="delete all"
-      @click="remove(tableActionOptions.ALL)"
-      color="yellow"
-    />
+  <div class="row">
+    <q-space />
+    <q-btn-dropdown outline rounded text-color="textColor" label="Actions">
+      <q-list separator dense bordered class="actions-list">
+        <q-item
+          clickable
+          v-close-popup
+          class="actions-item-download-json"
+          @click="save(tableActionOptions.SELECTED, tableActionOptions.JSON)"
+        >
+          <q-item-section>
+            <q-item-label>Download selected as json</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-close-popup
+          class="actions-item-download-json"
+          @click="save(tableActionOptions.ALL, tableActionOptions.JSON)"
+        >
+          <q-item-section>
+            <q-item-label>Download all as json</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-close-popup
+          class="actions-item-delete"
+          @click="remove(tableActionOptions.SELECTED)"
+        >
+          <q-item-section>
+            <q-item-label>Delete selected</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-close-popup
+          class="actions-item-delete"
+          @click="remove(tableActionOptions.ALL)"
+        >
+          <q-item-section>
+            <q-item-label>Delete all</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-btn-dropdown>
   </div>
 </template>
 
@@ -83,4 +107,11 @@ export default {
 };
 </script>
 
-<style lang="sass" scoped></style>
+<style lang="sass" scoped>
+.actions-list
+  background-color: $background2
+.actions-item-delete
+  color: $red
+.actions-item-download-json
+  color: $green
+</style>

@@ -7,7 +7,9 @@
       dense
       dark
       :visible-columns="visibleColumns"
-      color="primary"
+      color="cream"
+      card-class="bg-background2 text-textColor"
+      table-header-class="text-cream"
       rows-per-page-label="Posts per page"
       :rows-per-page-options="[10, 0]"
       :pagination.sync="pagination"

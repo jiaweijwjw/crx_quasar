@@ -15,11 +15,11 @@
       };
       chrome.runtime.sendMessage(parcel, res => {
         console.log(res);
-        chrome.storage.sync.get(["chunks"], function(results) {
+        chrome.storage.local.get(["chunks"], function(results) {
           let chunkObj = results["chunks"] ? results["chunks"] : {}; // value = obj[key]
           let newChunk = { [res.id]: { id: res.id, text, url } }; // es6 computed property names
           Object.assign(chunkObj, newChunk);
-          chrome.storage.sync.set({ ["chunks"]: chunkObj });
+          chrome.storage.local.set({ ["chunks"]: chunkObj });
         });
       });
     } else {
@@ -42,8 +42,8 @@
       );
       // use: ( a === b || a === c ). ( a === ( b || c )) does not work
       if (
-        (key === "appStatusToggle" && namespace === "sync") ||
-        (key === "drawerStatusToggle" && namespace === "sync")
+        (key === "appStatusToggle" && namespace === "local") ||
+        (key === "drawerStatusToggle" && namespace === "local")
       ) {
         console.log("newvalue: " + newValue);
         const msg = key === "appStatusToggle" ? "app.status" : "toggle.drawer";
@@ -74,7 +74,7 @@
   chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
     if (parcel.message === "initial.get") {
       console.log(sender);
-      chrome.storage.sync.get(
+      chrome.storage.local.get(
         ["appStatusToggle", "drawerStatusToggle"],
         results => {
           console.log(results);

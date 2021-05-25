@@ -143,9 +143,10 @@ const getMetaData = metaSection => {
           0,
           reactionTypeString.indexOf(":")
         );
-        const reactionImgSrc = listOfReactions[r]
-          .querySelector(META_EACH_IN_LIST_OF_REACTIONS_IMG_SRC)
-          .getAttribute("src");
+        // Can include the reaction img src if desired.
+        // const reactionImgSrc = listOfReactions[r]
+        //   .querySelector(META_EACH_IN_LIST_OF_REACTIONS_IMG_SRC)
+        //   .getAttribute("src");
         const reactionCountString = reactionTypeString.slice(
           reactionTypeString.indexOf(":") + 2 // slice() doesnt include the 'end' then an additional 1 for the space
         );
@@ -153,8 +154,8 @@ const getMetaData = metaSection => {
           reactionCountString.substring(0, reactionCountString.indexOf(" "))
         );
         reactionsData[reactionType] = {
-          reactionCount,
-          reactionImgSrc
+          reactionCount
+          // reactionImgSrc
         };
       }
     } else {

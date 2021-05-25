@@ -37,7 +37,6 @@ export default {
         return this.getAppStatusToggle;
       },
       set: function(newStatus) {
-        console.log(newStatus);
         this.setAppStatusToggle(newStatus);
       }
     }

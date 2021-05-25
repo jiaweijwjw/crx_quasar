@@ -1,41 +1,75 @@
 <template>
-  <div>
-    <q-btn
-      dense
-      label="download selected as txt"
-      @click="save(tableActionOptions.SELECTED, tableActionOptions.TXT)"
-      color="cyan"
-    />
-    <q-btn
-      dense
-      label="download all as txt"
-      @click="save(tableActionOptions.ALL, tableActionOptions.TXT)"
-      color="cyan"
-    />
-    <q-btn
-      dense
-      label="download selected as csv"
-      @click="save(tableActionOptions.SELECTED, tableActionOptions.CSV)"
-      color="magenta"
-    />
-    <q-btn
-      dense
-      label="download all as csv"
-      @click="save(tableActionOptions.ALL, tableActionOptions.CSV)"
-      color="magenta"
-    />
-    <q-btn
-      dense
-      label="delete selected"
-      @click="remove(tableActionOptions.SELECTED)"
-      color="yellow"
-    />
-    <q-btn
-      dense
-      label="delete all"
-      @click="remove(tableActionOptions.ALL)"
-      color="yellow"
-    />
+  <div class="row">
+    <q-space />
+    <q-btn-dropdown outline rounded text-color="textColor" label="Actions">
+      <q-list separator dense bordered class="actions-list">
+        <q-item
+          clickable
+          v-close-popup
+          class="actions-item-download-txt"
+          @click="save(tableActionOptions.SELECTED, tableActionOptions.TXT)"
+        >
+          <q-item-section>
+            <q-item-label>Download selected as txt</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-close-popup
+          class="actions-item-download-txt"
+          @click="save(tableActionOptions.ALL, tableActionOptions.TXT)"
+        >
+          <q-item-section>
+            <q-item-label>Download all as txt</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-close-popup
+          class="actions-item-download-csv"
+          @click="save(tableActionOptions.SELECTED, tableActionOptions.CSV)"
+        >
+          <q-item-section>
+            <q-item-label>Download selected as csv</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-close-popup
+          class="actions-item-download-csv"
+          @click="save(tableActionOptions.ALL, tableActionOptions.CSV)"
+        >
+          <q-item-section>
+            <q-item-label>Download all as csv</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-close-popup
+          class="actions-item-delete"
+          @click="remove(tableActionOptions.SELECTED)"
+        >
+          <q-item-section>
+            <q-item-label>Delete selected</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-close-popup
+          class="actions-item-delete"
+          @click="remove(tableActionOptions.ALL)"
+        >
+          <q-item-section>
+            <q-item-label>Delete all</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-btn-dropdown>
   </div>
 </template>
 
@@ -120,4 +154,13 @@ export default {
 };
 </script>
 
-<style lang="sass" scoped></style>
+<style lang="sass" scoped>
+.actions-list
+  background-color: $background2
+.actions-item-delete
+  color: $red
+.actions-item-download-txt
+  color: $yellow
+.actions-item-download-csv
+  color: $cyan
+</style>

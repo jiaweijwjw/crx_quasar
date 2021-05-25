@@ -13,7 +13,7 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
     const payload = event.data;
     if (payload.key === null) {
       // if key === null, get all keys in chrome storage
-      chrome.storage.sync.get(null, items => {
+      chrome.storage.local.get(null, items => {
         const results = [];
         // The bridge also does some work to split large data which is too big to be transmitted in one go
         // due to the browser extension 60mb data transfer limit. In order for this to happen, the payload must be an array.
@@ -25,7 +25,7 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
       });
     } else {
       // get a specific key-value pair from chrome storage
-      chrome.storage.sync.get([payload.key], items => {
+      chrome.storage.local.get([payload.key], items => {
         bridge.send(event.eventResponseKey, items[payload.key]);
       });
     }
@@ -33,7 +33,7 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
 
   bridge.on("storage.set", event => {
     const payload = event.data;
-    chrome.storage.sync.set(
+    chrome.storage.local.set(
       {
         [payload.key]: payload.data
       },
@@ -45,13 +45,13 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
 
   bridge.on("storage.remove", event => {
     const payload = event.data;
-    chrome.storage.sync.remove(payload.keys, () => {
+    chrome.storage.local.remove(payload.keys, () => {
       bridge.send(event.eventResponseKey);
     });
   });
 
   bridge.on("storage.get.all.posts", event => {
-    chrome.storage.sync.get(null, items => {
+    chrome.storage.local.get(null, items => {
       // items is an object of objects (key: value in chrome.storage)
       const results = [];
       for (let i = 0; i < nonPostKeys.length; i++) {
@@ -68,7 +68,7 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
   //   // get initial app and drawer status at content script side
   //   const payload = event.data;
   //   if (payload.msg === "getInitialStatuses") {
-  //     chrome.storage.sync.get(
+  //     chrome.storage.local.get(
   //       ["appStatusToggle", "drawerStatusToggle"],
   //       results => {
   //         bridge.send(event.eventResponseKey, results);
@@ -85,8 +85,8 @@ export default function attachBackgroundHooks(bridge, allActiveConnections) {
   //       `Old value was "${oldValue}", new value is "${newValue}".`
   //     );
   //     if (
-  //       (key === "appStatusToggle" && namespace === "sync") ||
-  //       (key === "drawerStatusToggle" && namespace === "sync")
+  //       (key === "appStatusToggle" && namespace === "local") ||
+  //       (key === "drawerStatusToggle" && namespace === "local")
   //     ) {
   //       console.log("newvalue: " + newValue);
   //       const msg = key === "appStatusToggle" ? "app.status" : "toggle.drawer";
