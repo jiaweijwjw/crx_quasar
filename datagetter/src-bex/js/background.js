@@ -3,7 +3,7 @@
   function onClickAddChunk(info) {
     const text = info.selectionText;
     const url = info.pageUrl;
-    console.log("Text selected: '" + text + "' from url: " + url);
+    console.log("Text selected: '" + text + "' From url: '" + url + "'");
     console.log("Number of characters selected: " + text.length);
     if (text.length !== 0) {
       let parcel = {
@@ -14,7 +14,6 @@
         }
       };
       chrome.runtime.sendMessage(parcel, res => {
-        console.log(res);
         chrome.storage.local.get(["chunks"], function(results) {
           let chunkObj = results["chunks"] ? results["chunks"] : {}; // value = obj[key]
           let newChunk = { [res.id]: { id: res.id, text, url } }; // es6 computed property names
@@ -40,7 +39,8 @@
         `Storage key "${key}" in namespace "${namespace}" changed.`,
         `Old value was "${oldValue}", new value is "${newValue}".`
       );
-      // use: ( a === b || a === c ). ( a === ( b || c )) does not work
+      // use: ( a === b || a === c )
+      // ( a === ( b || c )) does not work
       if (
         (key === "appStatusToggle" && namespace === "local") ||
         (key === "drawerStatusToggle" && namespace === "local")
@@ -72,12 +72,14 @@
   });
 
   chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
+    /* from chrome docs:
+     * This function becomes invalid when the event listener returns, unless you return true from the event listener to indicate you wish to
+     * send a response asynchronously (this will keep the message channel open to the other end until sendResponse is called).
+     */
     if (parcel.message === "initial.get") {
-      console.log(sender);
       chrome.storage.local.get(
         ["appStatusToggle", "drawerStatusToggle"],
         results => {
-          console.log(results);
           sendResponse({
             appStatusToggle: results.appStatusToggle,
             drawerStatusToggle: results.drawerStatusToggle
@@ -86,15 +88,31 @@
       );
       return true; // Getting from chrome.storage is asynchronous. return true to indicate we will be sending a response asynchronously.
     }
+    if (parcel.message == "new.fb.post.cs.to.bg") {
+      // this listener just has the responsibility of being a middleman to pass the parcel from contentscript to quasar.
+      // this is because if pass directly to quasar, will have multiple posts added if multiple tabs are running the extension.
+      // however, there is only one background script running for one extension. so putting the listener here will only add the post once even if multiple tabs are open with the extension.
+      let forwardedParcel = {
+        message: "new.fb.post.added",
+        content: Object.assign({}, parcel.content)
+      };
+      chrome.runtime.sendMessage(forwardedParcel, res => {
+        chrome.storage.local.set(
+          {
+            [res.id]: parcel.content
+          },
+          function() {
+            chrome.storage.local.get([res.id], function(results) {
+              if (results) {
+                sendResponse(true);
+              } else {
+                sendResponse(false);
+              }
+            });
+          }
+        );
+      });
+      return true; // return true to indicate we will be sending a response asynchronously.
+    }
   });
-
-  // chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-  //   console.log(changeInfo);
-  //   console.log(tab);
-  //   if (changeInfo.status) {
-  //     chrome.tabs.sendMessage(tabId, {
-  //       message: "status.complete"
-  //     });
-  //   }
-  // });
 })();

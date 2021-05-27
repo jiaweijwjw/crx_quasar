@@ -6,8 +6,7 @@ const defaultState = () => {
   return {
     appStatusToggle: null,
     drawerStatusToggle: null,
-    sideDrawer: false,
-    activeTabId: null
+    sideDrawer: false
   };
 };
 
@@ -25,9 +24,6 @@ const mutations = {
   },
   setSideDrawer(state, sideDrawer) {
     state.sideDrawer = sideDrawer;
-  },
-  setActiveTabId(state, activeTabId) {
-    state.activeTabId = activeTabId;
   }
 };
 
@@ -47,9 +43,6 @@ const actions = {
   },
   setSideDrawer({ commit }, sideDrawer) {
     commit("setSideDrawer", sideDrawer);
-  },
-  setActiveTbID({ commit }, activeTabId) {
-    commit("setActiveTabId", activeTabId);
   },
   async initCrxBrowser({ commit }) {
     Storage.get("drawerStatusToggle").then(res => {
@@ -84,9 +77,6 @@ const getters = {
   },
   getSideDrawer: state => {
     return state.sideDrawer;
-  },
-  getActiveTabId: state => {
-    return state.activeTabId;
   }
 };
 

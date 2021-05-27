@@ -37,10 +37,6 @@ export default {
     });
   },
 
-  addPost(post) {
-    return this.save(post.id, post);
-  },
-
   deletePosts(postsToDeleteIds) {
     // postsToDeleteIds is an array of strings of ids
     return this.delete(postsToDeleteIds);

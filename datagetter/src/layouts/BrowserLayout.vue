@@ -102,8 +102,7 @@ export default {
     ...mapActions("settingsstore", [
       "initCrxBrowser",
       "setDrawerStatusToggle",
-      "setSideDrawer",
-      "setActiveTabId"
+      "setSideDrawer"
     ]),
     toggleDrawer() {
       this.drawerStatusToggle = !this.drawerStatusToggle;
@@ -113,11 +112,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters("settingsstore", [
-      "getDrawerStatusToggle",
-      "getSideDrawer",
-      "getActiveTabId"
-    ]),
+    ...mapGetters("settingsstore", ["getDrawerStatusToggle", "getSideDrawer"]),
     drawerStatusToggle: {
       get: function() {
         return this.getDrawerStatusToggle;
@@ -133,14 +128,6 @@ export default {
       set: function(newStatus) {
         this.setSideDrawer(newStatus);
       }
-    },
-    activeTabId: {
-      get: function() {
-        return this.getActiveTabId;
-      },
-      set: function(newId) {
-        this.setActiveTabId(newId);
-      }
     }
   },
   async created() {
@@ -149,23 +136,12 @@ export default {
     await this.initPostData();
 
     let self = this;
-    // each tab that the extension is running on will detect this event.
-    // therefore have to check if this listener is the one on the active tab. If not, the chunk/post will be added multiple times.
-    chrome.tabs.onActivated.addListener(function(activeInfo) {
-      this.activeTabId = activeInfo.tabId;
-      console.log(this.activeTabId);
-    });
-    /*
-     * chunk is sent from background script so the content is already available there, dont have to resend
-     * fbpost is sent from content script instead so we have to send the post content to background script (to access chrome.storage) via addpost
-     */
 
     chrome.runtime.onMessage.addListener(function(
       parcel,
       sender,
       sendResponse
     ) {
-      console.log(sender);
       console.log(
         sender.tab
           ? "from a content script: " + sender.tab.url
@@ -180,16 +156,10 @@ export default {
           text: parcel.content.text,
           url: parcel.content.url
         };
-        console.log(chunk);
-        console.log(id);
         self.addChunk(chunk); // cannot use 'this' as the 'this' context is not the same.
         sendResponse({ id: id });
       }
 
-      /* from chrome docs:
-       * This function becomes invalid when the event listener returns, unless you return true from the event listener to indicate you wish to
-       * send a response asynchronously (this will keep the message channel open to the other end until sendResponse is called).
-       */
       if (parcel.message == "new.fb.post.added") {
         // from content script: facebook.com
         let id = uid();
@@ -201,15 +171,8 @@ export default {
           metaData: parcel.content.metaData,
           comments: parcel.content.comments
         };
-        self
-          .addPost(post)
-          .then(() => {
-            sendResponse(true);
-          })
-          .catch(() => {
-            sendResponse(false);
-          });
-        return true; // return true to indicate we will be sending a response asynchronously.
+        self.addPost(post);
+        sendResponse({ id: id });
       }
     });
   }

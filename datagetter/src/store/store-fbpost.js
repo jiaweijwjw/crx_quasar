@@ -61,17 +61,7 @@ const actions = {
       });
   },
   addPost({ commit }, post) {
-    return new Promise((resolve, reject) => {
-      Storage.addPost(post).then(
-        res => {
-          commit("addPost", post);
-          resolve(res);
-        },
-        err => {
-          reject(err);
-        }
-      );
-    });
+    commit("addPost", post);
   },
   setSelectedPosts({ commit }, selection) {
     commit("setSelectedPosts", selection);

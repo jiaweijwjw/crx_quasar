@@ -65,10 +65,14 @@ chrome.runtime.onMessage.addListener(function(parcel, sender, sendResponse) {
     appStatusToggle = parcel.content.onApp;
     if (parcel.content.onApp) {
       drawerStatusToggle ? showDrawer() : hideDrawer();
-      runCrxFb();
+      if (document.domain === "facebook.com") {
+        runCrxFb();
+      }
     } else {
       offApp();
-      stopCrxFb();
+      if (document.domain === "facebook.com") {
+        stopCrxFb();
+      }
     }
   }
   if (parcel.message === "toggle.drawer") {

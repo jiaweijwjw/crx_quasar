@@ -6,10 +6,12 @@
       :row-key="row => row.id"
       dense
       dark
+      title="Facebook Posts"
       :visible-columns="visibleColumns"
       color="cream"
       card-class="bg-background2 text-textColor"
       table-header-class="text-cream"
+      title-class="text-magenta"
       rows-per-page-label="Posts per page"
       :rows-per-page-options="[10, 0]"
       :pagination.sync="pagination"
@@ -41,8 +43,8 @@ export default {
           field: row => row.author.name,
           format: val => `${val}`,
           sortable: true,
-          style: "max-width: 20%",
-          classes: "ellipsis"
+          classes: "ellipsis",
+          headerClasses: "text-yellow"
         },
         {
           name: "postText",
@@ -50,8 +52,8 @@ export default {
           label: "Post Text",
           field: row => row.postBody.text || row.postBody.blockQuote,
           sortable: true,
-          style: "max-width: 80%",
-          classes: "ellipsis"
+          classes: "ellipsis",
+          headerClasses: "text-blue"
         }
       ]
     };

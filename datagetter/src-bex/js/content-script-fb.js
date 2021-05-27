@@ -4,7 +4,6 @@ const isWhichBodyPart = part => {
     const classesInNode = part.classList;
     const dir = part.getAttribute("dir");
     const tagName = part.tagName;
-    console.log(tagName);
     if (classesInNode.length === 0 && dir === "auto") {
       return postBodyPartEnum.TEXT;
     } else if (id && classesInNode.length === 1) {
@@ -42,7 +41,6 @@ const getAllReplies = listOfReplies => {
   if (listOfReplies.length === 0) {
     return;
   } else {
-    // length !== 0
     for (let i = 0; i < listOfReplies.length; i++) {
       let comment = {};
       let commentor = { name: "", fbLink: "" };
@@ -73,7 +71,7 @@ const getAllReplies = listOfReplies => {
           if (ext_link) {
             said["attached"] = ext_link.getAttribute("href");
           }
-          // what if got multiple sial
+          // This is unable to handle the case of multiple attached content.
         }
         commentor.name =
           commentorNode.textContent || `unable to get commentor's name`;
@@ -92,7 +90,6 @@ const getAllReplies = listOfReplies => {
       const moreReplies = listOfReplies[i].querySelector(
         GETALLREPLIES_MORE_REPLIES
       );
-      console.log(moreReplies);
       if (!moreReplies) {
         replies.push(comment);
       } else {
@@ -336,7 +333,7 @@ const sendPostToCrx = (
   hasErrorGettingSomeData
 ) => {
   let parcel = {
-    message: "new.fb.post.added",
+    message: "new.fb.post.cs.to.bg",
     content: {
       author,
       postBody,
@@ -528,11 +525,3 @@ function stopCrxFb() {
 document.onreadystatechange = function() {
   runCrxFb();
 };
-
-// chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-//   console.log(request);
-//   console.log(sender);
-//   if (request.message === "status.complete") {
-//     runCrxFb();
-//   }
-// });

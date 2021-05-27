@@ -6,10 +6,12 @@
       :row-key="row => row.id"
       dense
       dark
+      title="Text Chunks"
       :visible-columns="visibleColumns"
       color="cream"
       card-class="bg-background2 text-textColor"
       table-header-class="text-cream"
+      title-class="text-magenta"
       rows-per-page-label="Chunks per page"
       :rows-per-page-options="[10, 0]"
       :pagination.sync="pagination"
@@ -40,20 +42,18 @@ export default {
           align: "left",
           field: row => row.text,
           format: val => `${val}`,
+          sortable: true,
           classes: "ellipsis",
-          style: "max-width: 50%",
-          headerStyle: "max-width: 50%",
-          sortable: true
+          headerClasses: "text-yellow"
         },
         {
           name: "url",
           align: "left",
           label: "Url",
           field: row => row.url,
+          sortable: true,
           classes: "ellipsis",
-          style: "max-width: 50%",
-          headerStyle: "max-width: 50%",
-          sortable: true
+          headerClasses: "text-blue"
         }
       ]
     };
@@ -85,12 +85,4 @@ export default {
 };
 </script>
 
-<style lang="sass" scoped>
-.my-table-details
-    font-size: 0.85em
-    font-style: italic
-    max-width: 200px
-    white-space: normal
-    color: #555
-    margin-top: 4px
-</style>
+<style lang="sass" scoped></style>

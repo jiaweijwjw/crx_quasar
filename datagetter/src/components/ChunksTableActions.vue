@@ -160,7 +160,7 @@ export default {
 .actions-item-delete
   color: $red
 .actions-item-download-txt
-  color: $yellow
+  color: $violet
 .actions-item-download-csv
   color: $cyan
 </style>
