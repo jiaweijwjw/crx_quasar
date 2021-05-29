@@ -53,7 +53,7 @@ On facebook domains, the currently supported webpages for rendering the Addpost 
 * Enable/Disable "add chunk" context menu based on app On/Off status.
 * Make changes to all instances of the extension drawer on all tabs without having to refresh the webpage.
 
-## Debugging:
+### Debugging:
 * Note that Vue Devtools extension does not detect Quasar app in bex mode.
 * background script: inspect background (access via chrome://extensions page)
 * browserpage app: inspect webpage
