@@ -40,6 +40,7 @@ On facebook domains, the currently supported webpages for rendering the Addpost 
 * Using Quasar's bex mode allows us to have access to a bridge for communication. But is it better to use the bridge or standard chrome message passing? The latest implementation standardizes the use of chrome message passing for all communciations except for the get/save/delete functions in [storage.access.js](datagetter/src/services/storage.access.js). The working versions of communication via bridge is commented out.
 * All chunks are stored in a single "chunks" key while each individual post is stored as a key-value pair in chrome storage.
 * chrome.storage.local is used instead of chrome.storage.sync as the QUOTA_BYTES_PER_ITEM for chrome.storage.sync is too small for storing posts data.
+* Order of contentscripts in manifest file matters.
 
 ### Communication:
 * On/Off app and Open/Close drawer is done by listening to the changes of the status flag in chrome.storage.
@@ -54,4 +55,8 @@ On facebook domains, the currently supported webpages for rendering the Addpost 
 
 ## Debugging:
 * Note that Vue Devtools extension does not detect Quasar app in bex mode.
-* 
+* background script: inspect background (access via chrome://extensions page)
+* browserpage app: inspect webpage
+* popuppage app: inspect popup (access by right clicking the extension icon)
+* content script: inspect webpage
+
