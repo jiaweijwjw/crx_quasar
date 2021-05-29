@@ -35,7 +35,7 @@ There are two main functionalities that the extension can do which is to save an
 ### Details:
 
 ### Things to note:
-Using Quasar's bex mode allows us to have access to a bridge for communication. But is it better to use the bridge or standard chrome message passing? The latest implementation uses chrome message passing for all communciations except for the get/save/delete functions in [storage.access.js](datagetter/src/services/storage.access.js)
+Using Quasar's bex mode allows us to have access to a bridge for communication. But is it better to use the bridge or standard chrome message passing? The latest implementation uses chrome message passing for all communciations except for the get/save/delete functions in [storage.access.js](crx_quasar/datagetter/src/services/storage.access.js)
 
 ### Communication:
 
